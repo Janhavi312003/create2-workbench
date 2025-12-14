@@ -195,8 +195,10 @@ cd contracts
 
 **Create `.env` file:**
 
+```
 PRIVATE_KEY=your_private_key_here
 ROOTSTOCK_TESTNET_RPC=https://public-node.testnet.rsk.co
+```
 
 ## 🎮 Running the Application
 
