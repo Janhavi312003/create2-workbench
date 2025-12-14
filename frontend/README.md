@@ -510,20 +510,6 @@ content: [
 
 ---
 
-## 🤝 Contributing
-
-Contributions to improve the frontend are welcome!
-
-**Guidelines:**
-1. Follow existing code structure
-2. Use TypeScript with proper types
-3. Keep components small and focused
-4. Add comments for complex logic
-5. Test on multiple browsers
-6. Ensure responsive design
-
----
-
 ## 📄 License
 
 MIT 
