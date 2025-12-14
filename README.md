@@ -566,6 +566,18 @@ This project demonstrates:
 
 ---
 
+## 📧 Support
+
+For issues, questions, or contributions:
+
+- 🐛 [Open an issue](https://github.com/Janhavi312003/create2-workbench/issues)
+- 💬 Check existing documentation
+- 📖 Review [troubleshooting section](#-troubleshooting)
+- 🔍 Search closed issues for solutions
+
+---
+
+
 <div align="center">
 
 **Made with ❤️ for the Rootstock Ecosystem**
