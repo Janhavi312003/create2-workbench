@@ -336,10 +336,10 @@ forge script script/GetInfo.s.sol
 ```
 === SimpleStorage Info ===
 Bytecode:
-0x608060405234801561001057600080fd5b5061016e806100206000396000f3fe...
+0xyour_bytcode_here...
 
 Bytecode Hash:
-0x1a2b3c4d5e6f7890abcdef1234567890abcdef1234567890abcdef1234567890
+0xyour_bytcode_hash_here...
 
 Bytecode Length: 366 bytes
 ```
