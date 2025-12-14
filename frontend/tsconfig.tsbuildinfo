@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/calculatemode.tsx","./src/components/findsaltmode.tsx","./src/components/initcodehelper.tsx","./src/components/walletconnect.tsx","./src/config/networks.ts","./src/types/window.d.ts","./src/utils/create2.ts","./src/workers/saltminer.ts"],"version":"5.9.3"}
