@@ -12,7 +12,7 @@
 
 *Calculate deterministic contract addresses and deploy with CREATE2 on Rootstock blockchain*
 
-[Live Demo](https://your-vercel-url.vercel.app) • [Documentation](#-usage-guide) • [Report Bug](https://github.com/Janhavi312003/create2-workbench/issues)
+ • [Documentation](#-usage-guide) • [Report Bug](https://github.com/Janhavi312003/create2-workbench/issues)
 
 </div>
 
