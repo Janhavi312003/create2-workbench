@@ -78,6 +78,8 @@
 
 ## 🏗️ Architecture
 
+```
+
 ┌─────────────────────┐
 │ Frontend │
 │ (React + Vite) │
@@ -105,6 +107,7 @@
 │ Rootstock Blockchain│
 │ (Mainnet/Testnet) │
 └─────────────────────┘
+```
 
 ---
 
@@ -265,11 +268,14 @@ forge build
 ## 🔧 Deployed Contracts
 
 ### Rootstock Testnet
+```
 
 | Contract | Address | Explorer |
 |----------|---------|----------|
 | **CREATE2 Factory** | `0xf39e31f414e707f129AdC1E970006E07b07eA3Cc` | [View](https://explorer.testnet.rsk.co/address/0xf39e31f414e707f129AdC1E970006E07b07eA3Cc) |
 | **Deployment TX** | - | [View](https://explorer.testnet.rsk.co/tx/0xfb4dfd8f2aab50715e256bbca248c7a47ca480c480be188edffa70e37daa999e) |
+
+```
 
 **Network Details:**
 - Chain ID: `31`
@@ -341,39 +347,41 @@ forge script script/TestCreate2.s.sol --rpc-url rootstock_testnet --broadcast --
 
 ## 📁 Project Structure
 
+```text
 create2-workbench/
-├── frontend/ # React web application
-│ ├── src/
-│ │ ├── components/ # React components
-│ │ │ ├── CalculateMode.tsx
-│ │ │ ├── FindSaltMode.tsx
-│ │ │ ├── InitCodeHelper.tsx
-│ │ │ └── WalletConnect.tsx
-│ │ ├── utils/ # Utility functions
-│ │ │ └── create2.ts # CREATE2 calculations
-│ │ ├── workers/ # Web Workers
-│ │ │ └── saltMiner.ts # Vanity mining
-│ │ ├── types/ # TypeScript types
-│ │ ├── App.tsx # Main component
-│ │ └── main.tsx # Entry point
-│ ├── public/ # Static assets
-│ ├── package.json
-│ ├── vite.config.ts
-│ └── README.md
+├── frontend/                       # React web application
+│   ├── src/
+│   │   ├── components/             # React components
+│   │   │   ├── CalculateMode.tsx
+│   │   │   ├── FindSaltMode.tsx
+│   │   │   ├── InitCodeHelper.tsx
+│   │   │   └── WalletConnect.tsx
+│   │   ├── utils/                  # Utility functions
+│   │   │   └── create2.ts           # CREATE2 calculations
+│   │   ├── workers/                # Web Workers
+│   │   │   └── saltMiner.ts         # Vanity mining
+│   │   ├── types/                  # TypeScript types
+│   │   ├── App.tsx                 # Main component
+│   │   └── main.tsx                # Entry point
+│   ├── public/                     # Static assets
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── README.md
 │
-├── contracts/ # Solidity smart contracts
-│ ├── src/
-│ │ ├── Create2Factory.sol # Factory contract
-│ │ └── SimpleStorage.sol # Test contract
-│ ├── script/ # Deployment scripts
-│ │ ├── Deploy.s.sol
-│ │ ├── GetInfo.s.sol
-│ │ └── TestCreate2.s.sol
-│ ├── test/ # Contract tests
-│ ├── foundry.toml # Foundry config
-│ └── README.md
+├── contracts/                      # Solidity smart contracts
+│   ├── src/
+│   │   ├── Create2Factory.sol      # Factory contract
+│   │   └── SimpleStorage.sol       # Test contract
+│   ├── script/                     # Deployment scripts
+│   │   ├── Deploy.s.sol
+│   │   ├── GetInfo.s.sol
+│   │   └── TestCreate2.s.sol
+│   ├── test/                       # Contract tests
+│   ├── foundry.toml                # Foundry config
+│   └── README.md
 │
-└── README.md 
+└── README.md
+```
 
 ---
 
