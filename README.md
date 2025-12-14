@@ -78,7 +78,7 @@
 
 ## 🏗️ Architecture
 
-```
+```text
 
 ┌─────────────────────┐
 │ Frontend │
@@ -147,7 +147,7 @@
 
 **1. Clone the repository:**
 
-```
+```bash
 git clone https://github.com/Janhavi312003/create2-workbench.git
 
 cd create2-workbench
@@ -155,7 +155,7 @@ cd create2-workbench
 
 **2. Install Frontend Dependencies:**
 
-```
+```bash
 cd frontend
 
 npm install
@@ -163,7 +163,7 @@ npm install
 
 **3. Install Contract Dependencies:**
 
-```
+```bash
 cd ../contracts
 
 forge install
@@ -175,13 +175,13 @@ forge install
 
 **Navigate to frontend directory:**
 
-```
+```bash
 cd frontend
 ```
 
 **Create `.env` file** (optional - for custom RPC):
 
-```
+```text
 VITE_ROOTSTOCK_TESTNET_RPC=https://public-node.testnet.rsk.co
 VITE_ROOTSTOCK_MAINNET_RPC=https://public-node.rsk.co
 ```
@@ -189,7 +189,7 @@ VITE_ROOTSTOCK_MAINNET_RPC=https://public-node.rsk.co
 #### Contracts Configuration
 
 **Navigate to contracts directory:**
-```
+```bash
 cd contracts
 ```
 
@@ -204,7 +204,7 @@ ROOTSTOCK_TESTNET_RPC=https://public-node.testnet.rsk.co
 
 **Terminal 1 - Start Frontend:**
 
-```
+```bash
 cd frontend
 
 npm run dev
@@ -214,7 +214,7 @@ Frontend starts at: [**http://localhost:5173**](http://localhost:5173)
 
 **Terminal 2 - Compile Contracts (Optional):**
 
-```
+```bash
 cd contracts
 
 forge build
@@ -226,7 +226,7 @@ forge build
 
 **Build Frontend:**
 
-```
+```bash
 cd frontend
 
 npm run build
@@ -235,7 +235,7 @@ npm run preview
 ```
 
 **Build Contracts:**
-```
+```bash
 cd contracts
 
 forge build
@@ -561,17 +561,6 @@ This project demonstrates:
 - Powered by **Foundry**, **ethers.js**, and **React**
 - Inspired by the need for better deployment tools
 - Special thanks to EIP-1014 authors
-
----
-
-## 📧 Support
-
-For issues, questions, or contributions:
-
-- 🐛 [Open an issue](https://github.com/Janhavi312003/create2-workbench/issues)
-- 💬 Check existing documentation
-- 📖 Review [troubleshooting section](#-troubleshooting)
-- 🔍 Search closed issues for solutions
 
 ---
 
