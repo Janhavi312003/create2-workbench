@@ -147,18 +147,27 @@
 
 **1. Clone the repository:**
 
+```
 git clone https://github.com/Janhavi312003/create2-workbench.git
+
 cd create2-workbench
+```
 
 **2. Install Frontend Dependencies:**
 
+```
 cd frontend
+
 npm install
+```
 
 **3. Install Contract Dependencies:**
 
+```
 cd ../contracts
+
 forge install
+```
 
 ### Configuration
 
@@ -166,18 +175,23 @@ forge install
 
 **Navigate to frontend directory:**
 
+```
 cd frontend
+```
 
 **Create `.env` file** (optional - for custom RPC):
 
+```
 VITE_ROOTSTOCK_TESTNET_RPC=https://public-node.testnet.rsk.co
 VITE_ROOTSTOCK_MAINNET_RPC=https://public-node.rsk.co
+```
 
 #### Contracts Configuration
 
 **Navigate to contracts directory:**
-
+```
 cd contracts
+```
 
 **Create `.env` file:**
 
@@ -190,15 +204,21 @@ ROOTSTOCK_TESTNET_RPC=https://public-node.testnet.rsk.co
 
 **Terminal 1 - Start Frontend:**
 
+```
 cd frontend
+
 npm run dev
+```
 
 Frontend starts at: [**http://localhost:5173**](http://localhost:5173)
 
 **Terminal 2 - Compile Contracts (Optional):**
 
+```
 cd contracts
+
 forge build
+```
 
 **Open your browser and navigate to http://localhost:5173**
 
@@ -206,14 +226,20 @@ forge build
 
 **Build Frontend:**
 
+```
 cd frontend
+
 npm run build
+
 npm run preview
+```
 
 **Build Contracts:**
-
+```
 cd contracts
+
 forge build
+```
 
 ---
 
