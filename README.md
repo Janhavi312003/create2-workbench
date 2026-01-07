@@ -77,7 +77,7 @@
 ---
 
 ## 🏗️ Architecture
-
+```bash
 ┌─────────────────────┐
 │ Frontend │
 │ (React + Vite) │
@@ -105,7 +105,7 @@
 │ Rootstock Blockchain│
 │ (Mainnet/Testnet) │
 └─────────────────────┘
-
+```
 ---
 
 ## 🛠️ Technology Stack
@@ -143,74 +143,86 @@
 ### Installation
 
 **1. Clone the repository:**
-
+```bash
 git clone https://github.com/Janhavi312003/create2-workbench.git
 cd create2-workbench
+```
 
 **2. Install Frontend Dependencies:**
-
+```bash
 cd frontend
 npm install
+```
 
 **3. Install Contract Dependencies:**
-
+```bash
 cd ../contracts
 forge install
+```
 
 ### Configuration
 
 #### Frontend Configuration
 
 **Navigate to frontend directory:**
-
+```bash
 cd frontend
+```
 
 **Create `.env` file** (optional - for custom RPC):
 
+```bash
 VITE_ROOTSTOCK_TESTNET_RPC=https://public-node.testnet.rsk.co
 VITE_ROOTSTOCK_MAINNET_RPC=https://public-node.rsk.co
+```
 
 #### Contracts Configuration
 
 **Navigate to contracts directory:**
-
+```bash
 cd contracts
+```
 
 **Create `.env` file:**
-
+```bash
 PRIVATE_KEY=your_private_key_here
 ROOTSTOCK_TESTNET_RPC=https://public-node.testnet.rsk.co
+```
 
 ## 🎮 Running the Application
 
 ### Development Mode
 
 **Terminal 1 - Start Frontend:**
-
+```bash
 cd frontend
 npm run dev
+```
 
 Frontend starts at: [**http://localhost:5173**](http://localhost:5173)
 
 **Terminal 2 - Compile Contracts (Optional):**
-
+```bash
 cd contracts
 forge build
+```
 
 **Open your browser and navigate to http://localhost:5173**
 
 ### Production Build
 
 **Build Frontend:**
-
+```bash
 cd frontend
 npm run build
 npm run preview
+```
 
 **Build Contracts:**
-
+```bash
 cd contracts
 forge build
+```
 
 ---
 
@@ -265,11 +277,13 @@ forge build
 ## 🔧 Deployed Contracts
 
 ### Rootstock Testnet
+```bash
 
 | Contract | Address | Explorer |
 |----------|---------|----------|
 | **CREATE2 Factory** | `0xf39e31f414e707f129AdC1E970006E07b07eA3Cc` | [View](https://explorer.testnet.rsk.co/address/0xf39e31f414e707f129AdC1E970006E07b07eA3Cc) |
 | **Deployment TX** | - | [View](https://explorer.testnet.rsk.co/tx/0xfb4dfd8f2aab50715e256bbca248c7a47ca480c480be188edffa70e37daa999e) |
+```
 
 **Network Details:**
 - Chain ID: `31`
@@ -315,6 +329,7 @@ address = keccak256(0xff ++ deployer ++ salt ++ keccak256(init_code))[12:]
 ### Test with Sample Contracts
 
 The project includes test contracts you can deploy:
+```bash
 
 cd contracts
 
@@ -323,6 +338,7 @@ forge script script/GetInfo.s.sol
 
 Test deployment
 forge script script/TestCreate2.s.sol --rpc-url rootstock_testnet --broadcast --legacy -vvvv
+```
 
 
 ### Manual Testing Checklist
@@ -340,6 +356,7 @@ forge script script/TestCreate2.s.sol --rpc-url rootstock_testnet --broadcast --
 ---
 
 ## 📁 Project Structure
+```bash
 
 create2-workbench/
 ├── frontend/ # React web application
@@ -373,7 +390,8 @@ create2-workbench/
 │ ├── foundry.toml # Foundry config
 │ └── README.md
 │
-└── README.md 
+└── README.md
+```
 
 ---
 
