@@ -13,3 +13,7 @@ rootstock_mainnet = "${ROOTSTOCK_MAINNET_RPC}"
 
 [etherscan]
 rootstock_testnet = { key = "${BLOCKSCOUT_API_KEY}", url = "https://rootstock-testnet.blockscout.com/api" }
+
+
+[profile.default]
+remappings = ["@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/"]
