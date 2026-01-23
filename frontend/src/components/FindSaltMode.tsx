@@ -11,8 +11,9 @@ const isValidHex = (value: string): boolean => {
 };
 
 export default function FindSaltMode() {
-  const [deployerAddress, setDeployerAddress] = useState("0xf39e31f414e707f129AdC1E970006E07b07eA3Cc"); // Default factory
-  const [initCodeHash, setInitCodeHash] = useState("");
+  const factoryAddress = (import.meta as any)?.env?.VITE_FACTORY_ADDRESS || "0xf39e31f414e707f129AdC1E970006E07b07eA3Cc";
+  const [deployerAddress, setDeployerAddress] = useState(factoryAddress);
+  const [initCodeHash, setInitCodeHash] = useState("0x8f0ef1f921db5807d80fd113060720b50e76aa0123aeef09682060439f5b8d5e");
   const [prefix, setPrefix] = useState("0x0000");
   const [isSearching, setIsSearching] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -57,7 +58,7 @@ export default function FindSaltMode() {
     }
 
     setIsSearching(true);
-    setStatusMessage("🔍 Searching for matching salt...");
+    setStatusMessage("Searching for matching salt...");
 
     if (workerRef.current) {
       workerRef.current.terminate();
@@ -84,14 +85,14 @@ export default function FindSaltMode() {
         setFoundAddress(address);
         setIterations(iter);
         setIsSearching(false);
-        setStatusMessage(`✅ Found match in ${iter.toLocaleString()} iterations!`);
+        setStatusMessage(`Found match in ${iter.toLocaleString()} iterations!`);
         workerRef.current?.terminate();
       } else if (type === "progress") {
         setProgress(Math.round((current / total) * 100));
         setIterations(current);
       } else if (type === "complete") {
         setIsSearching(false);
-        setStatusMessage(message || "❌ No match found");
+        setStatusMessage(message || "No match found");
         workerRef.current?.terminate();
       } else if (type === "error") {
         setError(message);
@@ -126,7 +127,9 @@ export default function FindSaltMode() {
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-800 mb-2">Factory Address</label>
+          <label className="block text-sm font-medium text-slate-800 mb-2">
+            Factory Address <span className="text-xs text-slate-500">(VITE_FACTORY_ADDRESS)</span>
+          </label>
           <input
             type="text"
             placeholder="0x..."
@@ -139,7 +142,7 @@ export default function FindSaltMode() {
 
         <div>
           <label className="block text-sm font-medium text-slate-800 mb-2">
-            Init Code Hash <span className="text-xs text-slate-500">(from Foundry)</span>
+            Init Code Hash <span className="text-xs text-slate-500">(from GetInfo.s.sol)</span>
           </label>
           <input
             type="text"
@@ -179,7 +182,7 @@ export default function FindSaltMode() {
             : "bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"
         }`}
       >
-        {isSearching ? "⏹️ Stop Search" : "🚀 Start Search"}
+        {isSearching ? "⏹️ Stop Search" : "Start Search"}
       </button>
 
       {isSearching && (
