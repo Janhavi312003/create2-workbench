@@ -11,24 +11,17 @@ contract Create2Factory is ReentrancyGuard {
         return computeAddress(salt, initCodeHash);
     }
 
-    // FIXED: Correct CREATE2 formula (85 bytes total)
-    function computeAddress(bytes32 salt, bytes32 initCodeHash) public view returns (address) {
-        assembly {
-            // ptr = 0x00: 0xff (1 byte)
-            mstore(0x00, 0xff)
-            // ptr = 0x01: address(this) (20 bytes)
-            mstore(0x01, address())
-            // ptr = 0x15: salt (32 bytes)  
-            mstore(0x15, salt)
-            // ptr = 0x35: initCodeHash (32 bytes)
-            mstore(0x35, initCodeHash)
-            
-            // Hash 85 bytes: 0xff + 20 + 32 + 32 = 85 
-            let hash := keccak256(0x00, 0x55)
-            mstore(0x00, hash)
-            return(0x00, 32)
-        }
+    function computeAddress(bytes32 salt, bytes32 initCodeHash) public view returns (address addr) {
+    assembly {
+        let ptr := mload(0x40)
+        mstore(add(ptr, 0x40), initCodeHash)
+        mstore(add(ptr, 0x20), salt)
+        mstore(ptr, address())
+        let start := add(ptr, 0x0b)
+        mstore8(start, 0xff)
+        addr := and(keccak256(start, 85), 0xffffffffffffffffffffffffffffffffffffffff)
     }
+}
 
     function deploy(bytes32 salt, bytes memory bytecode) 
         public payable nonReentrant returns (address deployedAddress) 

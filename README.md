@@ -148,16 +148,24 @@ git clone https://github.com/Janhavi312003/create2-workbench.git
 cd create2-workbench
 ```
 
-**2. Install Frontend Dependencies:**
+**2. Install OpenZeppelin Dependencies:**
+```bash
+cd contracts
+git submodule update --init --recursive
+# OR
+forge install OpenZeppelin/openzeppelin-contracts --no-commit
+forge install
+```
+**3. Build Contracts:**
+```bash
+forge build
+```
+
+**4. Install Frontend Dependencies:**
 ```bash
 cd frontend
 npm install
-```
-
-**3. Install Contract Dependencies:**
-```bash
-cd ../contracts
-forge install
+npm run dev
 ```
 
 ### Configuration
