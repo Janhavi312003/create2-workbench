@@ -52,8 +52,8 @@ export default function FindSaltMode() {
       return;
     }
 
-    if (!prefix.trim() || !prefix.startsWith("0x")) {
-      setError("Prefix must start with 0x");
+    if (!prefix.trim() || !isValidHex(prefix)) {
+      setError("Prefix must be a valid hex value starting with 0x");
       return;
     }
 

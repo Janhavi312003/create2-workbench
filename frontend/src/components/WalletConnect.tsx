@@ -61,10 +61,10 @@ export default function WalletConnect() {
   };
 
   const connectWallet = async () => {
-    if (typeof (window as any).ethereum === undefined) {
-  setError("Please install MetaMask to use this feature!");
-  return;
-}
+    if (!(window as any).ethereum) {
+      alert("Please install MetaMask to use this feature!");
+    return;
+  }  
 
     try {
       const provider = new BrowserProvider(window.ethereum);
@@ -162,7 +162,6 @@ export default function WalletConnect() {
     </div>
   );
 }
-function setError(arg0: string) {
-  throw new Error('Function not implemented.');
-}
+
+
 
