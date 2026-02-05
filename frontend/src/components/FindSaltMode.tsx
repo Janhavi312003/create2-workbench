@@ -247,7 +247,7 @@ export default function FindSaltMode() {
             </span>
           ) : (
             <span className="flex items-center justify-center gap-3">
-              🚀 <span>Start Search</span>
+              <span>Start Search</span>
             </span>
           )}
         </button>
@@ -304,7 +304,7 @@ export default function FindSaltMode() {
             {/* Salt */}
             <div className="group">
               <span className="text-lg font-bold text-emerald-300 uppercase tracking-wider mb-6 block bg-emerald-500/20 px-6 py-3 rounded-2xl inline-flex items-center backdrop-blur-sm border border-emerald-400/50">
-                🔑 Salt Value
+                Salt Value
               </span>
               <div className="flex gap-6 p-8 bg-gray-900/60 backdrop-blur-xl rounded-3xl border-2 border-emerald-400/40 shadow-2xl group-hover:shadow-emerald-500/30 transition-all duration-500">
                 <code className="flex-1 p-6 bg-gray-800/80 backdrop-blur-sm border border-emerald-400/50 rounded-2xl font-mono text-xl break-all font-bold text-emerald-300 shadow-2xl">
@@ -314,7 +314,7 @@ export default function FindSaltMode() {
                   onClick={() => navigator.clipboard.writeText(foundSalt)}
                   className="px-8 py-6 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-xl rounded-2xl hover:from-emerald-600 hover:to-green-700 shadow-2xl hover:shadow-emerald-500/50 transform hover:scale-105 active:scale-95 transition-all duration-300 whitespace-nowrap backdrop-blur-sm border border-emerald-400/50"
                 >
-                  📋 Copy
+                   Copy
                 </button>
               </div>
             </div>
@@ -322,7 +322,7 @@ export default function FindSaltMode() {
             {/* Address */}
             <div className="group">
               <span className="text-lg font-bold text-emerald-300 uppercase tracking-wider mb-6 block bg-emerald-500/20 px-6 py-3 rounded-2xl inline-flex items-center backdrop-blur-sm border border-emerald-400/50">
-                🏠 Target Address
+                Target Address
               </span>
               <div className="flex gap-6 p-8 bg-gray-900/60 backdrop-blur-xl rounded-3xl border-2 border-emerald-400/40 shadow-2xl group-hover:shadow-emerald-500/30 transition-all duration-500">
                 <code className="flex-1 p-6 bg-gray-800/80 backdrop-blur-sm border border-emerald-400/50 rounded-2xl font-mono text-xl break-all font-bold text-emerald-300 shadow-2xl">
@@ -332,7 +332,7 @@ export default function FindSaltMode() {
                   onClick={() => navigator.clipboard.writeText(foundAddress)}
                   className="px-8 py-6 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-xl rounded-2xl hover:from-emerald-600 hover:to-green-700 shadow-2xl hover:shadow-emerald-500/50 transform hover:scale-105 active:scale-95 transition-all duration-300 whitespace-nowrap backdrop-blur-sm border border-emerald-400/50"
                 >
-                  📋 Copy
+                  Copy
                 </button>
               </div>
             </div>
@@ -341,7 +341,7 @@ export default function FindSaltMode() {
           {/* Deploy CTA */}
           <div className="mt-12 pt-12 border-t-4 border-emerald-400/30">
             <p className="text-center text-emerald-300 font-black text-2xl bg-emerald-500/20 px-12 py-8 rounded-3xl inline-block backdrop-blur-xl border-2 border-emerald-400/50 shadow-2xl">
-              🎉 Deploy on Rootstock Mainnet/Testnet Now!
+              Deploy on Rootstock Mainnet/Testnet Now!
             </p>
           </div>
         </div>
