@@ -4,33 +4,36 @@ declare global {
   }
 }
 
-import { useState, useEffect } from 'react';
-import { BrowserProvider } from 'ethers';
-import { ROOTSTOCK_TESTNET } from '../config/networks';
+import { useState, useEffect } from "react";
+import { BrowserProvider } from "ethers";
+import { ROOTSTOCK_TESTNET } from "../config/networks";
 
 export default function WalletConnect() {
-  const [account, setAccount] = useState<string>('');
-  const [chainId, setChainId] = useState<string>('');
+  const [account, setAccount] = useState<string>("");
+  const [chainId, setChainId] = useState<string>("");
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     checkConnection();
-    
+
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', handleChainChanged);
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
+      window.ethereum.on("chainChanged", handleChainChanged);
     }
 
     return () => {
       if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        window.ethereum.removeListener('chainChanged', handleChainChanged);
+        window.ethereum.removeListener(
+          "accountsChanged",
+          handleAccountsChanged,
+        );
+        window.ethereum.removeListener("chainChanged", handleChainChanged);
       }
     };
   }, []);
 
   const checkConnection = async () => {
-    if (typeof window.ethereum !== 'undefined') {
+    if (typeof window.ethereum !== "undefined") {
       try {
         const provider = new BrowserProvider(window.ethereum);
         const accounts = await provider.listAccounts();
@@ -41,7 +44,7 @@ export default function WalletConnect() {
           setIsConnected(true);
         }
       } catch (error) {
-        console.error('Error checking connection:', error);
+        console.error("Error checking connection:", error);
       }
     }
   };
@@ -51,7 +54,7 @@ export default function WalletConnect() {
       setAccount(accounts[0]);
       setIsConnected(true);
     } else {
-      setAccount('');
+      setAccount("");
       setIsConnected(false);
     }
   };
@@ -63,31 +66,31 @@ export default function WalletConnect() {
   const connectWallet = async () => {
     if (!(window as any).ethereum) {
       alert("Please install MetaMask to use this feature!");
-    return;
-  }  
+      return;
+    }
 
     try {
       const provider = new BrowserProvider(window.ethereum);
-      const accounts = await provider.send('eth_requestAccounts', []);
+      const accounts = await provider.send("eth_requestAccounts", []);
       setAccount(accounts[0]);
       const network = await provider.getNetwork();
       setChainId(network.chainId.toString());
       setIsConnected(true);
     } catch (error) {
-      console.error('Error connecting wallet:', error);
-      alert('Failed to connect wallet');
+      console.error("Error connecting wallet:", error);
+      alert("Failed to connect wallet");
     }
   };
 
   const switchToRootstock = async () => {
-    if (typeof window.ethereum === 'undefined') {
-      alert('Please install MetaMask!');
+    if (typeof window.ethereum === "undefined") {
+      alert("Please install MetaMask!");
       return;
     }
 
     try {
       await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
+        method: "wallet_switchEthereumChain",
         params: [{ chainId: ROOTSTOCK_TESTNET.chainId }],
       });
     } catch (switchError: any) {
@@ -95,57 +98,59 @@ export default function WalletConnect() {
       if (switchError.code === 4902) {
         try {
           await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
+            method: "wallet_addEthereumChain",
             params: [ROOTSTOCK_TESTNET],
           });
         } catch (addError) {
-          console.error('Error adding Rootstock network:', addError);
-          alert('Failed to add Rootstock network');
+          console.error("Error adding Rootstock network:", addError);
+          alert("Failed to add Rootstock network");
         }
       } else {
-        console.error('Error switching network:', switchError);
+        console.error("Error switching network:", switchError);
       }
     }
   };
 
   const disconnectWallet = () => {
-    setAccount('');
-    setChainId('');
+    setAccount("");
+    setChainId("");
     setIsConnected(false);
   };
 
-  const isRootstockNetwork = chainId === '31' || chainId === '30';
-  const shortenAddress = (addr: string) => 
+  const isRootstockNetwork = chainId === "31" || chainId === "30";
+  const shortenAddress = (addr: string) =>
     `${addr.substring(0, 6)}...${addr.substring(addr.length - 4)}`;
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-4">
       {!isConnected ? (
         <button
           onClick={connectWallet}
-          className="px-4 mt-6 py-2 bg-pink-600 text-white rounded-lg text-sm font-medium hover:bg-pink-700 transition-colors"
+          className="px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-xl rounded-2xl shadow-lg shadow-orange-500/40 hover:from-orange-600 hover:to-orange-700 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 backdrop-blur-sm border border-orange-500/50"
         >
-          Connect Wallet
+          🔗 Connect Wallet
         </button>
       ) : (
         <>
           {!isRootstockNetwork && (
             <button
               onClick={switchToRootstock}
-              className="px-3 py-2 bg-orange-500 text-white rounded-lg text-xs font-medium hover:bg-orange-600 transition-colors animate-pulse"
+              className="px-4 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold text-sm rounded-xl shadow-md shadow-orange-500/30 hover:from-orange-600 hover:to-orange-700 hover:shadow-lg animate-pulse border border-orange-500/50 transition-all duration-300"
             >
               Switch to Rootstock
             </button>
           )}
-          
-          <div className="flex items-center gap-2 bg-white/20 rounded-lg px-3 py-2">
-            <div className={`w-2 h-2 rounded-full ${isRootstockNetwork ? 'bg-green-400' : 'bg-yellow-400'}`}></div>
-            <span className="text-xs font-mono text-white">
+
+          <div className="flex items-center gap-3 bg-gray-900/60 backdrop-blur-sm rounded-2xl px-4 py-3 border border-gray-700 shadow-lg">
+            <div
+              className={`w-3 h-3 rounded-full shadow-lg ${isRootstockNetwork ? "bg-emerald-400 shadow-emerald-500/50" : "bg-amber-400 shadow-amber-500/50"}`}
+            ></div>
+            <span className="text-sm font-mono text-orange-200 font-semibold tracking-wide">
               {shortenAddress(account)}
             </span>
             <button
               onClick={disconnectWallet}
-              className="text-white hover:text-red-300 text-xs ml-2"
+              className="p-1.5 bg-gray-800/50 hover:bg-red-500/50 hover:text-red-200 rounded-xl text-orange-300 hover:text-white font-bold transition-all duration-200 shadow-md hover:shadow-red-500/30 ml-2"
               title="Disconnect"
             >
               ✕
@@ -153,8 +158,10 @@ export default function WalletConnect() {
           </div>
 
           {isRootstockNetwork && (
-            <span className="text-xs text-white/90 font-medium">
-              {chainId === '31' ? '🟢 Rootstock Testnet' : '🟢 Rootstock Mainnet'}
+            <span className="text-sm text-orange-300 font-semibold bg-gray-900/50 backdrop-blur-sm px-4 py-2 rounded-xl border border-orange-500/30 shadow-md">
+              {chainId === "31"
+                ? "🟢 Rootstock Testnet"
+                : "🟢 Rootstock Mainnet"}
             </span>
           )}
         </>
@@ -162,6 +169,3 @@ export default function WalletConnect() {
     </div>
   );
 }
-
-
-
