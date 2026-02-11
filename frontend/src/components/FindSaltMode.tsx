@@ -67,11 +67,6 @@ export default function FindSaltMode() {
       return;
     }
 
-    // if (!prefix.trim() || !isValidHex(prefix)) {
-    //   setError("Prefix must be a valid hex value starting with 0x");
-    //   return;
-    // }
-
     setIsSearching(true);
     setStatusMessage("Searching for matching salt...");
 

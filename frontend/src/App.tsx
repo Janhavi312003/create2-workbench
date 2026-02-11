@@ -68,7 +68,7 @@ function App() {
         <footer className="text-center mt-16 mb-12">
           <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 inline-block">
             <p className="text-orange-300 text-sm md:text-base font-semibold drop-shadow-md">
-              © 2025 Built for{" "}
+              © 2026 Built for{" "}
               <a
                 href="https://dev.rootstock.io"
                 target="_blank"
