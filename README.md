@@ -156,7 +156,22 @@ git submodule update --init --recursive
 forge install OpenZeppelin/openzeppelin-contracts --no-commit
 forge install
 ```
-**3. Build Contracts:**
+
+**3. Environment Configuration:**
+
+**Contract Environment Setup**
+```bash
+cd contracts
+cp .env.example .env
+```
+
+**Frontend Environment Setup**
+```bash
+cd frontend
+cp .env.example .env
+```
+
+**4. Build Contracts:**
 ```bash
 forge build
 ```
