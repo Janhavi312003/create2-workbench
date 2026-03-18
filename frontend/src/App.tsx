@@ -42,12 +42,14 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-gray-900 via-black to-gray-950 flex flex-col">
+    <div className="min-h-screen w-full flex flex-col bg-[#0B0B0F] text-white">
+      {/* Rootstock-inspired subtle backdrop */}
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(900px_420px_at_15%_-10%,rgba(91,108,255,0.18),transparent_60%),radial-gradient(700px_360px_at_88%_12%,rgba(255,102,0,0.12),transparent_55%),radial-gradient(900px_520px_at_50%_115%,rgba(120,80,255,0.10),transparent_60%)]" />
       <Navbar />
       
       <Routes>
         <Route path="/" element={
-          <div className="max-w-7xl mx-auto w-full flex-grow px-4 py-8">
+          <div className="rs-page flex-grow">
             {/* Header */}
             <header className="text-center mb-8">
               <div className="flex justify-between items-start mb-6">
@@ -62,7 +64,7 @@ function App() {
                   {deployedContracts.length > 0 && (
                     <button
                       onClick={() => setShowDeployedList(!showDeployedList)}
-                      className="px-4 py-2 bg-gray-800/80 rounded-xl text-orange-400 hover:bg-gray-700 transition-all flex items-center gap-2 border border-gray-700"
+                      className="rs-btn px-4 py-2 text-orange-300 hover:text-orange-200"
                     >
                       <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                       {deployedContracts.length} Deployed
@@ -73,12 +75,12 @@ function App() {
             </header>
 
             {/* Tab Bar */}
-            <div className="bg-gray-900/60 backdrop-blur-sm rounded-3xl p-1 flex mb-8 border border-gray-700 shadow-xl">
+            <div className="rs-panel p-1 flex mb-8">
               <button
                 className={`flex-1 py-4 rounded-2xl text-base md:text-lg font-bold transition-all duration-300 ${
                   activeMode === "calculate"
                     ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-2xl shadow-orange-500/40 transform scale-105"
-                    : "text-orange-300 hover:bg-gray-800/50 hover:text-orange-200 hover:shadow-lg"
+                    : "text-orange-200/90 hover:bg-white/5 hover:text-orange-200"
                 }`}
                 onClick={() => setActiveMode("calculate")}
               >
@@ -88,7 +90,7 @@ function App() {
                 className={`flex-1 py-4 rounded-2xl text-base md:text-lg font-bold transition-all duration-300 ${
                   activeMode === "find"
                     ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-2xl shadow-orange-500/40 transform scale-105"
-                    : "text-orange-300 hover:bg-gray-800/50 hover:text-orange-200 hover:shadow-lg"
+                    : "text-orange-200/90 hover:bg-white/5 hover:text-orange-200"
                 }`}
                 onClick={() => setActiveMode("find")}
               >
@@ -112,7 +114,7 @@ function App() {
 
             {/* Deployed Contracts List */}
             {showDeployedList && deployedContracts.length > 0 && (
-              <div className="mt-12 bg-gray-900/70 backdrop-blur-sm rounded-3xl p-8 border border-gray-700">
+              <div className="mt-12 rs-panel-strong p-8">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-2xl font-bold text-white flex items-center gap-2">
                     <span className="w-3 h-3 bg-green-500 rounded-full"></span>
@@ -128,8 +130,8 @@ function App() {
                 
                 <div className="space-y-6">
                   {deployedContracts.map((contract, index) => (
-                    <div key={index} className="border border-gray-700 rounded-2xl overflow-hidden">
-                      <div className="bg-gray-800/50 p-4 border-b border-gray-700">
+                    <div key={index} className="border rounded-2xl overflow-hidden border-white/10">
+                      <div className="bg-white/5 p-4 border-b border-white/10">
                         <div className="flex items-center justify-between">
                           <span className="text-orange-400 font-mono text-sm">
                             Deployed {new Date(contract.timestamp).toLocaleString()}

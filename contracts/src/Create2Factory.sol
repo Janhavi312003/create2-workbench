@@ -28,8 +28,10 @@ contract Create2Factory is ReentrancyGuard {
         assembly {
             let ptr := mload(0x40)
 
-            mstore(ptr, 0xff)
-            mstore(add(ptr, 0x01), address())
+            // Layout per EIP-1014:
+            // keccak256(0xff ++ deployingAddress ++ salt ++ initCodeHash)
+            mstore8(ptr, 0xff)
+            mstore(add(ptr, 0x01), shl(96, address()))
             mstore(add(ptr, 0x15), salt)
             mstore(add(ptr, 0x35), initCodeHash)
 

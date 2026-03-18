@@ -4,7 +4,7 @@ import {
   isValidAddress,
   isValidHex,
 } from "../utils/create2";
-import { FaCopy, FaCheck, FaExclamationTriangle, FaRocket, FaCalculator, FaTrash, FaHistory } from 'react-icons/fa';
+import { FaCopy, FaCheck, FaExclamationTriangle, FaCalculator, FaTrash, FaHistory } from 'react-icons/fa';
 import { BsLightningCharge } from 'react-icons/bs';
 
 export default function CalculateMode() {
@@ -17,7 +17,6 @@ export default function CalculateMode() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [recentCalculations, setRecentCalculations] = useState<string[]>([]);
-  const [isCalculating, setIsCalculating] = useState(false);
   const [validationErrors, setValidationErrors] = useState({
     deployer: "",
     salt: "",
@@ -27,7 +26,7 @@ export default function CalculateMode() {
   // Load factory address from env
   useEffect(() => {
     const factoryAddress = (import.meta as any)?.env?.VITE_FACTORY_ADDRESS || 
-      "0xf39e31f414e707f129AdC1E970006E07b07eA3Cc";
+      "0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72";
     setDeployerAddress(factoryAddress);
   }, []);
 
@@ -91,8 +90,6 @@ export default function CalculateMode() {
         return;
       }
 
-      setIsCalculating(true);
-      
       try {
         const address = calculateCreate2Address(
           deployerAddress,
@@ -110,8 +107,6 @@ export default function CalculateMode() {
       } catch {
         setError("Failed to calculate address");
         setResult("");
-      } finally {
-        setIsCalculating(false);
       }
     }, 300);
 
@@ -128,7 +123,7 @@ export default function CalculateMode() {
 
   const resetForm = () => {
     const factoryAddress = (import.meta as any)?.env?.VITE_FACTORY_ADDRESS || 
-      "0xf39e31f414e707f129AdC1E970006E07b07eA3Cc";
+      "0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72";
     setDeployerAddress(factoryAddress);
     setSalt("0x0000000000000000000000000000000000000000000000000000000000000001");
     setInitCodeHash("");
@@ -143,7 +138,7 @@ export default function CalculateMode() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-950 bg-opacity-60 backdrop-blur-sm rounded-3xl p-8 border border-gray-700 shadow-xl hover:shadow-orange-500/10 transition-all duration-500">
+    <div className="rs-panel-strong p-8">
       {/* Header */}
       <div className="flex items-center mb-6 group">
         <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mr-4 shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
@@ -182,7 +177,7 @@ export default function CalculateMode() {
             className={`w-full rounded-2xl border-2 transition-all duration-300 px-5 py-4 text-lg font-mono bg-gray-800/70 backdrop-blur-sm text-white placeholder-gray-400 shadow-lg hover:shadow-orange-400/25 ${
               validationErrors.deployer
                 ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/30"
-                : "border-gray-600/50 focus:border-orange-400 focus:ring-4 focus:ring-orange-500/30 hover:border-orange-400/80"
+                : "border-white/10 focus:border-orange-400 focus:ring-4 focus:ring-orange-500/20 hover:border-white/15"
             }`}
             placeholder="0x..."
             value={deployerAddress}
@@ -208,7 +203,7 @@ export default function CalculateMode() {
             className={`w-full rounded-2xl border-2 transition-all duration-300 px-5 py-4 text-lg font-mono bg-gray-800/70 backdrop-blur-sm text-white placeholder-gray-400 shadow-lg hover:shadow-orange-400/25 ${
               validationErrors.salt
                 ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/30"
-                : "border-gray-600/50 focus:border-orange-400 focus:ring-4 focus:ring-orange-500/30 hover:border-orange-400/80"
+                : "border-white/10 focus:border-orange-400 focus:ring-4 focus:ring-orange-500/20 hover:border-white/15"
             }`}
             value={salt}
             onChange={(e) => setSalt(e.target.value)}
@@ -234,7 +229,7 @@ export default function CalculateMode() {
               className={`w-full rounded-2xl border-2 transition-all duration-300 px-5 py-4 text-lg font-mono bg-gray-800/70 backdrop-blur-sm text-white placeholder-gray-400 shadow-lg hover:shadow-orange-400/25 pr-24 ${
                 validationErrors.initCode
                   ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/30"
-                  : "border-gray-600/50 focus:border-orange-400 focus:ring-4 focus:ring-orange-500/30 hover:border-orange-400/80"
+                  : "border-white/10 focus:border-orange-400 focus:ring-4 focus:ring-orange-500/20 hover:border-white/15"
               }`}
               placeholder="0x..."
               value={initCodeHash}
@@ -263,7 +258,7 @@ export default function CalculateMode() {
 
       {/* Recent Calculations */}
       {recentCalculations.length > 0 && (
-        <div className="mt-6 p-4 bg-gray-900/50 rounded-2xl border border-gray-700">
+        <div className="mt-6 p-4 rs-card">
           <div className="flex items-center gap-2 mb-3">
             <FaHistory className="text-gray-400" />
             <span className="text-sm text-gray-400 font-medium">Recent</span>

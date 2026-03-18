@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { hashInitCode } from "../utils/create2";
-import { FaCopy, FaCheck, FaCode, FaLightbulb, FaExclamationTriangle, FaRocket } from 'react-icons/fa';
+import { FaCopy, FaCheck, FaCode, FaLightbulb, FaRocket } from 'react-icons/fa';
 import { BsLightningCharge } from 'react-icons/bs';
 
 export default function InitCodeHelper() {
@@ -78,7 +78,7 @@ export default function InitCodeHelper() {
   const stats = getBytecodeStats();
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-950 bg-opacity-60 backdrop-blur-sm rounded-3xl p-8 border border-gray-700 shadow-xl hover:shadow-orange-500/10 transition-all duration-500">
+    <div className="rs-panel-strong p-8">
       {/* Header with Icon */}
       <div className="flex items-center mb-6 group">
         <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-yellow-600 rounded-2xl flex items-center justify-center mr-4 shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
@@ -101,7 +101,7 @@ export default function InitCodeHelper() {
       <div className="mb-8 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl border border-blue-500/30 backdrop-blur-sm">
         <div className="flex items-start gap-3">
           <FaLightbulb className="text-yellow-500 text-xl flex-shrink-0 mt-1" />
-          <p className="text-[#a0a0a0] text-sm leading-relaxed">
+          <p className="rs-muted text-sm leading-relaxed">
             <span className="text-white font-bold">Quick tip:</span> Get bytecode from Remix (Compile → Bytecode) or from your compiled contract artifacts. 
             The hash is used in Calculate Mode and Find Salt Mode.
           </p>
@@ -141,18 +141,18 @@ export default function InitCodeHelper() {
           value={bytecode}
           onChange={(e) => setBytecode(e.target.value)}
           rows={6}
-          className="w-full rounded-2xl border-2 border-gray-600/50 focus:border-orange-500 focus:ring-4 focus:ring-orange-400/30 px-5 py-4 text-lg font-mono bg-gray-800/70 backdrop-blur-sm text-white placeholder-gray-400 resize-none shadow-xl hover:shadow-orange-500/20 hover:border-orange-400/70 transition-all duration-300 font-mono text-sm"
+          className="w-full rounded-2xl border-2 border-white/10 focus:border-orange-500 focus:ring-4 focus:ring-orange-400/20 px-5 py-4 font-mono bg-black/30 backdrop-blur-sm text-white placeholder-white/40 resize-none shadow-xl hover:shadow-orange-500/10 hover:border-white/15 transition-all duration-300 text-sm"
         />
       </div>
 
       {/* Bytecode Stats */}
       {stats && (
         <div className="mb-6 flex flex-wrap gap-3">
-          <div className="px-4 py-2 bg-gray-800/50 rounded-xl border border-gray-700">
+          <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/10">
             <span className="text-xs text-gray-400 block">Bytes</span>
             <span className="text-sm font-mono text-orange-400 font-bold">{stats.bytes}</span>
           </div>
-          <div className="px-4 py-2 bg-gray-800/50 rounded-xl border border-gray-700">
+          <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/10">
             <span className="text-xs text-gray-400 block">Format</span>
             <span className="text-sm font-mono text-orange-400 font-bold">{stats.has0x ? '0x prefix' : 'no prefix'}</span>
           </div>
@@ -208,7 +208,7 @@ export default function InitCodeHelper() {
 
           <div className="flex flex-col gap-4">
             <code
-              className={`text-lg break-all font-mono rounded-2xl px-6 py-5 shadow-xl border font-bold text-white shadow-2xl ${
+              className={`text-lg break-all font-mono rounded-2xl px-6 py-5 border font-bold text-white shadow-2xl ${
                 hash.startsWith("Error")
                   ? "bg-red-900/50 border-red-400/50"
                   : "bg-gray-800/80 border-emerald-400/50 hover:border-emerald-400 transition-colors"

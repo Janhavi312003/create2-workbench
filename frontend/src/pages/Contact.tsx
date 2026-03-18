@@ -17,23 +17,23 @@ export function Contact() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-12">
+    <div className="rs-page max-w-6xl">
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
           Get in <span className="text-orange-500">Touch</span>
         </h1>
-        <p className="text-xl text-[#a0a0a0] max-w-3xl mx-auto">
+        <p className="text-xl rs-muted max-w-3xl mx-auto">
           Have questions? Need help? We're here for you!
         </p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-8 mb-12">
-        <div className="bg-gray-900/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 text-center">
+        <div className="rs-card p-6 text-center">
           <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
             <FaGithub className="text-orange-500 text-2xl" />
           </div>
           <h3 className="text-white font-bold mb-2">GitHub Issues</h3>
-          <p className="text-[#a0a0a0] text-sm mb-4">Report bugs or contribute</p>
+          <p className="rs-muted text-sm mb-4">Report bugs or contribute</p>
           <a 
             href="https://github.com/Janhavi312003/create2-workbench/issues"
             target="_blank"
@@ -44,12 +44,12 @@ export function Contact() {
           </a>
         </div>
 
-        <div className="bg-gray-900/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 text-center">
+        <div className="rs-card p-6 text-center">
           <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
             <FaBook className="text-orange-500 text-2xl" />
           </div>
           <h3 className="text-white font-bold mb-2">Documentation</h3>
-          <p className="text-[#a0a0a0] text-sm mb-4">Check our docs first</p>
+          <p className="rs-muted text-sm mb-4">Check our docs first</p>
           <a 
             href="/docs"
             className="text-orange-500 hover:text-orange-400 font-medium inline-flex items-center gap-1"
@@ -58,12 +58,12 @@ export function Contact() {
           </a>
         </div>
 
-        <div className="bg-gray-900/70 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 text-center">
+        <div className="rs-card p-6 text-center">
           <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
             <FaDiscord className="text-orange-500 text-2xl" />
           </div>
           <h3 className="text-white font-bold mb-2">Community</h3>
-          <p className="text-[#a0a0a0] text-sm mb-4">Join our Discord</p>
+          <p className="rs-muted text-sm mb-4">Join our Discord</p>
           <a 
             href="https://discord.gg/rootstock"
             target="_blank"
@@ -77,7 +77,7 @@ export function Contact() {
 
       <div className="grid md:grid-cols-2 gap-8">
         {/* Contact Form */}
-        <div className="bg-gray-900/70 backdrop-blur-sm rounded-3xl p-8 border border-gray-700">
+        <div className="rs-panel-strong p-8">
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
             <FaEnvelope className="text-orange-500" />
             Send us a Message
@@ -93,7 +93,7 @@ export function Contact() {
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="w-full bg-black/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="rs-input"
                 placeholder="Your name"
                 required
               />
@@ -108,7 +108,7 @@ export function Contact() {
                 id="email"
                 value={formData.email}
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="w-full bg-black/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="rs-input"
                 placeholder="your@email.com"
                 required
               />
@@ -123,7 +123,7 @@ export function Contact() {
                 value={formData.message}
                 onChange={(e) => setFormData({...formData, message: e.target.value})}
                 rows={5}
-                className="w-full bg-black/50 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                className="rs-input"
                 placeholder="How can we help you?"
                 required
               />
@@ -131,7 +131,7 @@ export function Contact() {
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-orange-500/20 hover:shadow-orange-500/30"
+              className="w-full rs-btn-primary"
             >
               Send Message
             </button>
@@ -140,9 +140,9 @@ export function Contact() {
 
         {/* Additional Info */}
         <div className="space-y-6">
-          <div className="bg-gray-900/70 backdrop-blur-sm rounded-3xl p-8 border border-gray-700">
+          <div className="rs-panel p-8">
             <h2 className="text-2xl font-bold text-white mb-4">Support</h2>
-            <p className="text-[#a0a0a0] mb-6">
+            <p className="rs-muted mb-6">
               For technical issues, feature requests, or questions about CREATE2 Workbench, 
               feel free to reach out through any of these channels:
             </p>
@@ -152,7 +152,7 @@ export function Contact() {
                 href="https://github.com/Janhavi312003/create2-workbench/issues"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 text-[#a0a0a0] hover:text-orange-500 transition-colors"
+                className="flex items-center gap-3 rs-muted hover:text-orange-300 transition-colors"
               >
                 <FaBug className="text-lg" />
                 <span>Report a Bug</span>
@@ -161,7 +161,7 @@ export function Contact() {
                 href="https://github.com/Janhavi312003/create2-workbench/discussions"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 text-[#a0a0a0] hover:text-orange-500 transition-colors"
+                className="flex items-center gap-3 rs-muted hover:text-orange-300 transition-colors"
               >
                 <FaGithub className="text-lg" />
                 <span>GitHub Discussions</span>
@@ -170,7 +170,7 @@ export function Contact() {
                 href="https://twitter.com/rootstock_io"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 text-[#a0a0a0] hover:text-orange-500 transition-colors"
+                className="flex items-center gap-3 rs-muted hover:text-orange-300 transition-colors"
               >
                 <FaTwitter className="text-lg" />
                 <span>Twitter</span>
@@ -178,12 +178,12 @@ export function Contact() {
             </div>
           </div>
 
-          <div className="bg-orange-500/10 border border-orange-500/30 rounded-3xl p-8">
+          <div className="bg-orange-500/8 border border-orange-500/25 rounded-3xl p-8 backdrop-blur-sm shadow-[0_18px_55px_rgba(255,102,0,0.10)]">
             <h2 className="text-2xl font-bold text-white mb-4">Built For</h2>
-            <p className="text-[#a0a0a0] mb-4">
+            <p className="rs-muted mb-4">
               Rootstock Hacktivator Program 2026
             </p>
-            <p className="text-[#a0a0a0] text-sm">
+            <p className="rs-muted text-sm">
               This project demonstrates production-ready tooling for Rootstock developers, 
               implementing full EIP-1014 support for deterministic contract deployment.
             </p>

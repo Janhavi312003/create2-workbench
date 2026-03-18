@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { waitForTransactionReceipt } from '@wagmi/core';
 import { config } from './Providers';
@@ -26,13 +26,13 @@ export function InteractWithDeployed({ contractAddress }: Props) {
   });
 
   // Write new value (store)
-  const { writeContract, isPending: isWritePending } = useWriteContract();
+  const { writeContractAsync, isPending: isWritePending } = useWriteContract();
 
   const handleStore = async () => {
     if (!value) return;
     
     try {
-      const hash = await writeContract({
+      const hash = await writeContractAsync({
         address: contractAddress,
         abi: simpleStorageABI,
         functionName: 'store',
@@ -69,9 +69,9 @@ export function InteractWithDeployed({ contractAddress }: Props) {
   const isLoading = isWritePending || isTxLoading;
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 to-gray-950 p-6">
+    <div className="p-6 bg-[rgba(12,12,18,0.45)]">
       {/* Contract Address */}
-      <div className="mb-6 p-4 bg-gray-800/50 rounded-xl border border-gray-700">
+      <div className="mb-6 p-4 rounded-2xl border border-white/10 bg-white/5">
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-400">Contract Address:</span>
           <button
@@ -97,7 +97,7 @@ export function InteractWithDeployed({ contractAddress }: Props) {
       </div>
       
       {/* Current Value */}
-      <div className="mb-6 p-5 bg-gray-800/30 rounded-xl border border-gray-700">
+      <div className="mb-6 p-5 bg-white/5 rounded-2xl border border-white/10">
         <div className="flex items-center justify-between mb-3">
           <span className="text-sm font-bold text-orange-300">Current Value</span>
           <button
@@ -126,12 +126,12 @@ export function InteractWithDeployed({ contractAddress }: Props) {
             onChange={(e) => setValue(e.target.value)}
             placeholder="Enter number"
             disabled={!isConnected || isLoading}
-            className="flex-1 p-4 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/30 transition-all disabled:opacity-50"
+            className="flex-1 p-4 bg-black/25 border border-white/10 rounded-2xl text-white placeholder-white/40 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 transition-all disabled:opacity-50"
           />
           <button
             onClick={handleStore}
             disabled={!isConnected || !value || isLoading}
-            className="px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/20"
+            className="px-8 py-4 rs-btn-primary rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? '⏳' : 'Store'}
           </button>

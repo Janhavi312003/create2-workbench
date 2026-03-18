@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useAccount, useWriteContract } from "wagmi";
+import { useState, useRef, useEffect } from "react";
+import { useAccount, useChainId, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "./Providers";
 import { isValidAddress } from "../utils/create2";
@@ -42,10 +42,11 @@ interface FindSaltModeProps {
 
 export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
   const factoryAddress = factoryConfig.address;
-  const { isConnected, address } = useAccount();
+  const { isConnected } = useAccount();
+  const chainId = useChainId();
 
   // Form states
-  const [deployerAddress, setDeployerAddress] = useState(factoryAddress);
+  const [deployerAddress, setDeployerAddress] = useState<string>(factoryAddress);
   const [initCodeHash, setInitCodeHash] = useState(
     "0x8f0ef1f921db5807d80fd113060720b50e76aa0123aeef09682060439f5b8d5e",
   );
@@ -59,6 +60,7 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
   const [foundAddress, setFoundAddress] = useState("");
   const [iterations, setIterations] = useState(0);
   const [error, setError] = useState("");
+  const [errorDetails, setErrorDetails] = useState<string>("");
   const [statusMessage, setStatusMessage] = useState("");
 
   // Copy states
@@ -96,7 +98,7 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
   };
 
   // Wagmi v2 hooks
-  const { writeContract, isPending: isWritePending } = useWriteContract();
+  const { writeContractAsync, isPending: isWritePending } = useWriteContract();
 
   // Calculate prefix difficulty
   useEffect(() => {
@@ -295,33 +297,48 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
   const handleDeploy = async () => {
     if (!isConnected) {
       setError("Please connect your wallet first!");
+      setErrorDetails("");
       return;
     }
 
     if (!foundSalt) {
       setError("No salt found yet. Mine a salt first!");
+      setErrorDetails("");
       return;
     }
 
     if (!bytecode) {
       setError("Please paste your contract bytecode!");
+      setErrorDetails("");
       return;
     }
 
     if (!bytecode.startsWith("0x")) {
       setError("Bytecode must start with 0x");
+      setErrorDetails("");
       return;
     }
 
     setDeployStep("preparing");
     setError("");
+    setErrorDetails("");
     setTxHash(undefined);
     setIsDeploySuccess(false);
 
     try {
+      const expectedChainId = Number(import.meta.env.VITE_PUBLIC_CHAIN_ID || 31);
+      if (Number.isFinite(expectedChainId) && chainId !== expectedChainId) {
+        setError(
+          `Wrong network. Please switch your wallet to Rootstock Testnet (chainId ${expectedChainId}).`,
+        );
+        setErrorDetails(`Connected chainId: ${chainId}`);
+        setDeployStep("idle");
+        return;
+      }
+
       // 1. Write the contract (deploy)
-      const hash = await writeContract({
-        address: factoryConfig.address,
+      const hash = await writeContractAsync({
+        address: deployerAddress as `0x${string}`,
         abi: factoryConfig.abi,
         functionName: "deploy",
         args: [foundSalt, bytecode],
@@ -346,11 +363,36 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
       }
     } catch (err) {
       console.error("Deployment error:", err);
-      setError(
+      const raw =
         err instanceof Error
           ? err.message
-          : "Deployment failed. Check console for details.",
-      );
+          : typeof err === "string"
+            ? err
+            : JSON.stringify(err);
+
+      // Short, user-friendly message + keep raw in details.
+      const lower = raw.toLowerCase();
+      if (
+        lower.includes("rpc endpoint returned too many errors") ||
+        lower.includes("too many errors")
+      ) {
+        setError(
+          "RPC is overloaded/unreliable right now. Please try again or change the RPC URL in your frontend .env.",
+        );
+      } else if (lower.includes("requested resource not available")) {
+        setError(
+          "RPC provider rejected the request. This is usually a temporary RPC issue or a network mismatch. Try changing RPC or switching network.",
+        );
+      } else {
+        setError("Deployment failed. Open details for the full error.");
+      }
+
+      // Prevent the UI from dumping massive calldata/bytecode.
+      const trimmed = raw
+        .replace(/data:\s*0x[0-9a-fA-F]+/g, "data: <redacted>")
+        .replace(/bytecode\)\s*args:\s*\([^)]*\)/g, "bytecode) args: (<redacted>)");
+
+      setErrorDetails(trimmed);
       setDeployStep("idle");
     } finally {
       setIsTxLoading(false);
@@ -368,7 +410,7 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
   const isLoading = isWritePending || isTxLoading;
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-black to-gray-950 bg-opacity-60 backdrop-blur-sm rounded-3xl p-8 border border-gray-700 shadow-xl hover:shadow-orange-500/10 transition-all duration-500">
+    <div className="rs-panel-strong p-8">
       {/* Header */}
       <div className="flex items-center mb-6 group">
         <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-yellow-600 rounded-2xl flex items-center justify-center mr-4 shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
@@ -424,9 +466,9 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
         )}
 
       {/* Main Form */}
-      <div className="space-y-6 bg-gray-900/50 backdrop-blur-xl rounded-3xl p-7 border border-gray-700/50 shadow-2xl shadow-black/30 mb-8">
+      <div className="space-y-6 rs-panel p-7 mb-8">
         <div>
-          <label className="block text-sm font-bold text-orange-300 mb-3 tracking-wide uppercase bg-gray-800/50 px-3 py-1 rounded-xl inline-flex items-center border border-orange-500/30">
+          <label className="text-sm font-bold text-orange-300 mb-3 tracking-wide uppercase bg-gray-800/50 px-3 py-1 rounded-xl inline-flex items-center border border-orange-500/30">
             Factory Address
             <span className="text-xs bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded-full font-mono ml-2">
               VITE_FACTORY_ADDRESS
@@ -438,7 +480,7 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
             value={deployerAddress}
             onChange={(e) => setDeployerAddress(e.target.value)}
             disabled={isSearching}
-            className="w-full p-5 rounded-2xl border-2 border-gray-600/50 focus:border-orange-500 focus:ring-4 focus:ring-orange-400/30 font-mono text-lg bg-gray-800/70 backdrop-blur-sm text-white placeholder-gray-400 disabled:bg-gray-900/50 disabled:cursor-not-allowed shadow-xl hover:shadow-orange-500/20 transition-all duration-300 hover:border-orange-400/70"
+            className="w-full p-5 rounded-2xl border-2 border-white/10 focus:border-orange-500 focus:ring-4 focus:ring-orange-400/20 font-mono text-lg bg-black/30 backdrop-blur-sm text-white placeholder-white/40 disabled:bg-black/20 disabled:cursor-not-allowed shadow-xl hover:shadow-orange-500/10 transition-all duration-300 hover:border-white/15"
           />
         </div>
 
@@ -465,7 +507,7 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
               value={initCodeHash}
               onChange={(e) => setInitCodeHash(e.target.value)}
               disabled={isSearching}
-              className="w-full p-5 rounded-2xl border-2 border-gray-600/50 focus:border-orange-500 focus:ring-4 focus:ring-orange-400/30 font-mono text-lg bg-gray-800/70 backdrop-blur-sm text-white placeholder-gray-400 disabled:bg-gray-900/50 disabled:cursor-not-allowed shadow-xl hover:shadow-orange-500/20 transition-all duration-300 hover:border-orange-400/70 pr-24"
+              className="w-full p-5 rounded-2xl border-2 border-white/10 focus:border-orange-500 focus:ring-4 focus:ring-orange-400/20 font-mono text-lg bg-black/30 backdrop-blur-sm text-white placeholder-white/40 disabled:bg-black/20 disabled:cursor-not-allowed shadow-xl hover:shadow-orange-500/10 transition-all duration-300 hover:border-white/15 pr-24"
             />
             <button
               onClick={() =>
@@ -481,7 +523,7 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-orange-300 mb-3 tracking-wide uppercase bg-gray-800/50 px-3 py-1 rounded-xl inline-flex items-center border border-orange-500/30">
+          <label className="text-sm font-bold text-orange-300 mb-3 tracking-wide uppercase bg-gray-800/50 px-3 py-1 rounded-xl inline-flex items-center border border-orange-500/30">
             Desired Prefix
           </label>
           <input
@@ -490,7 +532,7 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
             value={prefix}
             onChange={(e) => setPrefix(e.target.value)}
             disabled={isSearching}
-            className="w-full p-5 rounded-2xl border-2 border-gray-600/50 focus:border-orange-500 focus:ring-4 focus:ring-orange-400/30 font-mono text-lg bg-gray-800/70 backdrop-blur-sm text-white placeholder-gray-400 disabled:bg-gray-900/50 disabled:cursor-not-allowed shadow-xl hover:shadow-orange-500/20 transition-all duration-300 hover:border-orange-400/70"
+            className="w-full p-5 rounded-2xl border-2 border-white/10 focus:border-orange-500 focus:ring-4 focus:ring-orange-400/20 font-mono text-lg bg-black/30 backdrop-blur-sm text-white placeholder-white/40 disabled:bg-black/20 disabled:cursor-not-allowed shadow-xl hover:shadow-orange-500/10 transition-all duration-300 hover:border-white/15"
           />
         </div>
       </div>
@@ -583,10 +625,25 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
 
       {/* Error State */}
       {error && (
-        <div className="mt-6 p-4 bg-red-500/10 border border-red-400/40 backdrop-blur-sm rounded-2xl shadow-xl">
+        <div className="mt-6 p-4 bg-red-500/10 border border-red-400/40 backdrop-blur-sm rounded-2xl shadow-xl max-w-full">
           <div className="flex items-start gap-3">
             <FaExclamationTriangle className="text-red-400 text-xl flex-shrink-0 mt-0.5" />
-            <div className="text-red-200 font-medium">{error}</div>
+            <div className="min-w-0 flex-1">
+              <div className="text-red-200 font-medium break-words overflow-hidden">
+                {error}
+              </div>
+
+              {errorDetails && (
+                <details className="mt-3">
+                  <summary className="cursor-pointer text-sm text-red-300/90 hover:text-red-200 transition-colors">
+                    Show technical details
+                  </summary>
+                  <pre className="mt-3 max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-xl border border-red-400/20 bg-black/30 p-3 text-xs text-red-100/90">
+                    {errorDetails}
+                  </pre>
+                </details>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -665,7 +722,11 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
           <div className="flex gap-2 mb-4">
             <select
               value={selectedExample}
-              onChange={(e) => loadExampleBytecode(e.target.value)}
+              onChange={(e) => {
+                const next = e.target.value;
+                setSelectedExample(next);
+                loadExampleBytecode(next);
+              }}
               className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-xl text-white text-sm"
             >
               <option value="">Load example contract...</option>

@@ -4,9 +4,6 @@ import {
   FaChevronUp,
   FaQuestionCircle,
   FaRocket,
-  FaCalculator,
-  FaSearch,
-  FaCode,
   FaWallet,
   FaShieldAlt,
 } from "react-icons/fa";
@@ -79,7 +76,7 @@ export function FAQ() {
         },
         {
           q: "What's the factory contract address?",
-          a: "The CREATE2 Factory is deployed at: 0xf39e31f414e707f129AdC1E970006E07b07eA3Cc on Rootstock Testnet. You can verify it on the explorer: https://explorer.testnet.rsk.co/address/0xf39e31f414e707f129AdC1E970006E07b07eA3Cc",
+          a: "The CREATE2 Factory is deployed at: 0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72 on Rootstock Testnet. You can verify it on the explorer: https://explorer.testnet.rsk.co/address/0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72",
         },
       ],
     },
@@ -108,13 +105,13 @@ export function FAQ() {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="rs-page max-w-4xl">
       {/* Header */}
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
           Frequently Asked <span className="text-orange-500">Questions</span>
         </h1>
-        <p className="text-xl text-[#a0a0a0] max-w-3xl mx-auto">
+        <p className="text-xl rs-muted max-w-3xl mx-auto">
           Everything you need to know about CREATE2 Workbench and Rootstock
         </p>
       </div>
@@ -124,10 +121,10 @@ export function FAQ() {
         {faqCategories.map((category, catIndex) => (
           <div
             key={catIndex}
-            className="bg-gray-900/70 backdrop-blur-sm rounded-3xl border border-gray-700 overflow-hidden"
+            className="rs-panel-strong overflow-hidden"
           >
             {/* Category Header */}
-            <div className="bg-gradient-to-r from-orange-500/20 to-transparent p-6 border-b border-gray-700">
+            <div className="bg-gradient-to-r from-orange-500/18 to-transparent p-6 border-b border-white/10">
               <h2 className="text-2xl font-bold text-white flex items-center gap-3">
                 <span className="text-orange-500">{category.icon}</span>
                 {category.title}
@@ -135,7 +132,7 @@ export function FAQ() {
             </div>
 
             {/* FAQ Items */}
-            <div className="divide-y divide-gray-800">
+            <div className="divide-y divide-white/10">
               {category.items.map((item, itemIndex) => {
                 const globalIndex = catIndex * 100 + itemIndex;
                 const isOpen = openItems.includes(globalIndex);
@@ -150,7 +147,7 @@ export function FAQ() {
                         {item.q}
                       </h3>
                       <div
-                        className={`w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center flex-shrink-0 transition-all ${isOpen ? "bg-orange-500 rotate-180" : "group-hover:bg-gray-700"}`}
+                        className={`w-8 h-8 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 transition-all ${isOpen ? "bg-orange-500 rotate-180" : "group-hover:bg-white/10"}`}
                       >
                         {isOpen ? (
                           <FaChevronUp className="text-white" />
@@ -161,7 +158,7 @@ export function FAQ() {
                     </button>
 
                     {isOpen && (
-                      <div className="mt-4 text-[#a0a0a0] leading-relaxed">
+                      <div className="mt-4 rs-muted leading-relaxed">
                         {item.a}
                       </div>
                     )}
@@ -175,11 +172,11 @@ export function FAQ() {
 
       {/* Still Have Questions */}
       <div className="mt-12 text-center">
-        <div className="bg-orange-500/10 border border-orange-500/30 rounded-3xl p-8">
+        <div className="bg-orange-500/8 border border-orange-500/25 rounded-3xl p-8 backdrop-blur-sm shadow-[0_18px_55px_rgba(255,102,0,0.10)]">
           <h2 className="text-2xl font-bold text-white mb-4">
             Still Have Questions?
           </h2>
-          <p className="text-[#a0a0a0] mb-6">
+          <p className="rs-muted mb-6">
             Can't find what you're looking for? Reach out to us!
           </p>
           <a

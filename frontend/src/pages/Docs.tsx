@@ -1,4 +1,4 @@
-import { FaBook, FaRocket, FaCalculator, FaSearch, FaCode, FaCopy, FaWallet, FaExternalLinkAlt } from 'react-icons/fa'
+import { FaRocket, FaCalculator, FaSearch, FaCode, FaWallet, FaExternalLinkAlt } from 'react-icons/fa'
 import { useState } from 'react'
 import { BsLightningCharge } from 'react-icons/bs'
 
@@ -68,7 +68,7 @@ export function Docs() {
             <h4 className="text-lg font-bold text-white mb-3">Step-by-step Guide</h4>
             <ol className="list-decimal list-inside space-y-3 text-[#a0a0a0]">
               <li>Click "Calculate Mode" tab</li>
-              <li>Enter Factory Address: <code className="bg-gray-950 px-2 py-1 rounded text-orange-400 text-sm">0xf39e31f414e707f129AdC1E970006E07b07eA3Cc</code></li>
+              <li>Enter Factory Address: <code className="bg-gray-950 px-2 py-1 rounded text-orange-400 text-sm">0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72</code></li>
               <li>Enter Salt: Any 32-byte hex value (e.g., 0x0000...0001)</li>
               <li>Enter Init Code Hash: Bytecode hash from Init Helper</li>
               <li>Result: Predicted CREATE2 address shown instantly</li>
@@ -79,7 +79,7 @@ export function Docs() {
           <div className="bg-black/50 rounded-xl p-6 border border-gray-800">
             <h4 className="text-lg font-bold text-white mb-3">Example</h4>
             <div className="bg-gray-950 rounded-lg p-4 font-mono text-sm space-y-2">
-              <p><span className="text-orange-500">Deployer:</span> 0xf39e31f414e707f129AdC1E970006E07b07eA3Cc</p>
+              <p><span className="text-orange-500">Deployer:</span> 0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72</p>
               <p><span className="text-orange-500">Salt:</span> 0x0000000000000000000000000000000000000000000000000000000000000001</p>
               <p><span className="text-orange-500">Init Code Hash:</span> 0x1a2b3c...</p>
               <p><span className="text-orange-500">Predicted Address:</span> 0x4e5a... (calculated instantly)</p>
@@ -99,7 +99,7 @@ export function Docs() {
             <h4 className="text-lg font-bold text-white mb-3">How to Mine Vanity Addresses</h4>
             <ol className="list-decimal list-inside space-y-3 text-[#a0a0a0]">
               <li>Click "Find Salt Mode" tab</li>
-              <li>Enter Factory Address: 0xf39e31f414e707f129AdC1E970006E07b07eA3Cc</li>
+              <li>Enter Factory Address: 0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72</li>
               <li>Enter Init Code Hash: Bytecode hash from Init Helper</li>
               <li>Enter Target Prefix: Desired address start (e.g., 0000 for 0x0000...)</li>
               <li>Click "Start Mining"</li>
@@ -178,12 +178,12 @@ export function Docs() {
                   <td className="py-4 text-[#a0a0a0]">CREATE2 Factory</td>
                   <td className="py-4">
                     <code className="bg-gray-950 px-2 py-1 rounded text-orange-400 text-sm">
-                      0xf39e31f414e707f129AdC1E970006E07b07eA3Cc
+                      0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72
                     </code>
                   </td>
                   <td className="py-4">
                     <a 
-                      href="https://explorer.testnet.rsk.co/address/0xf39e31f414e707f129AdC1E970006E07b07eA3Cc"
+                      href="https://explorer.testnet.rsk.co/address/0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-orange-500 hover:text-orange-400 flex items-center gap-1"
@@ -212,12 +212,12 @@ export function Docs() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
+    <div className="rs-page">
       <div className="text-center mb-12">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
           <span className="text-orange-500">Documentation</span>
         </h1>
-        <p className="text-xl text-[#a0a0a0] max-w-3xl mx-auto">
+        <p className="text-xl rs-muted max-w-3xl mx-auto">
           Everything you need to know about using CREATE2 Workbench on Rootstock
         </p>
       </div>
@@ -225,7 +225,7 @@ export function Docs() {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Sidebar */}
         <div className="lg:w-64 flex-shrink-0">
-          <div className="bg-gray-900/70 backdrop-blur-sm rounded-2xl border border-gray-700 p-4 sticky top-24">
+          <div className="rs-panel p-4 sticky top-24">
             <h3 className="text-white font-bold mb-3 px-3">Sections</h3>
             <nav className="space-y-1">
               {Object.entries(sections).map(([key, section]) => (
@@ -235,7 +235,7 @@ export function Docs() {
                   className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                     activeSection === key
                       ? 'bg-gradient-to-r from-orange-500/20 to-orange-600/20 text-orange-500 border border-orange-500/30'
-                      : 'text-[#a0a0a0] hover:bg-gray-800/50 hover:text-orange-400'
+                      : 'rs-muted hover:bg-white/5 hover:text-orange-300'
                   }`}
                 >
                   <span className="text-lg">{section.icon}</span>
@@ -248,7 +248,7 @@ export function Docs() {
 
         {/* Content */}
         <div className="flex-1">
-          <div className="bg-gray-900/70 backdrop-blur-sm rounded-3xl border border-gray-700 p-8 md:p-12">
+          <div className="rs-panel-strong p-8 md:p-12">
             {sections[activeSection as keyof typeof sections]?.content}
           </div>
         </div>
