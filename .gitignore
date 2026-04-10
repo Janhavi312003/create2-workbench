@@ -12,6 +12,12 @@ dist/
 build/
 out/
 
+# Frontend build artifacts / emitted TS
+frontend/dist-types/
+**/tsconfig.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
 # Misc
 .DS_Store
 

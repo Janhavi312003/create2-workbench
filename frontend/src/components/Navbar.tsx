@@ -1,20 +1,35 @@
+import { useState } from 'react'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { Link, useLocation } from 'react-router-dom'
-import { FaSun, FaMoon } from 'react-icons/fa'
-import { useTheme } from '../context/ThemeContext'
+import { FaBars, FaTimes } from 'react-icons/fa'
+import { hasWalletConnectProjectId } from './Providers'
+import { InjectedWalletControls } from './InjectedWalletControls'
 
 export function Navbar() {
-  const { theme, toggleTheme } = useTheme()
   const location = useLocation()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   const isActive = (path: string) => {
     return location.pathname === path
   }
 
+  const navLinkClass = (path: string) =>
+    `text-sm font-medium transition-colors ${
+      isActive(path)
+        ? 'text-orange-500'
+        : 'text-[#a0a0a0] hover:text-orange-500'
+    }`
+
   return (
     <nav className="bg-black border-b border-[#2a2a2a] py-4 px-6">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-orange-600 focus:text-white"
+      >
+        Skip to main content
+      </a>
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           {/* Logo and Brand */}
           <Link to="/" className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-lg shadow-orange-500/20">
@@ -28,72 +43,39 @@ export function Navbar() {
             </div>
           </Link>
 
-          {/* Navigation Links */}
+          {/* Navigation Links — desktop */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link 
-              to="/" 
-              className={`text-sm font-medium transition-colors ${
-                isActive('/') 
-                  ? 'text-orange-500' 
-                  : 'text-[#a0a0a0] hover:text-orange-500'
-              }`}
-            >
+            <Link to="/" className={navLinkClass('/')}>
               Dashboard
             </Link>
-            <Link 
-              to="/docs" 
-              className={`text-sm font-medium transition-colors ${
-                isActive('/docs') 
-                  ? 'text-orange-500' 
-                  : 'text-[#a0a0a0] hover:text-orange-500'
-              }`}
-            >
+            <Link to="/docs" className={navLinkClass('/docs')}>
               Docs
             </Link>
-            <Link 
-              to="/faq" 
-              className={`text-sm font-medium transition-colors ${
-                isActive('/faq') 
-                  ? 'text-orange-500' 
-                  : 'text-[#a0a0a0] hover:text-orange-500'
-              }`}
-            >
+            <Link to="/faq" className={navLinkClass('/faq')}>
               FAQ
             </Link>
-            <Link 
-              to="/about" 
-              className={`text-sm font-medium transition-colors ${
-                isActive('/about') 
-                  ? 'text-orange-500' 
-                  : 'text-[#a0a0a0] hover:text-orange-500'
-              }`}
-            >
+            <Link to="/about" className={navLinkClass('/about')}>
               About
             </Link>
-            <Link 
-              to="/contact" 
-              className={`text-sm font-medium transition-colors ${
-                isActive('/contact') 
-                  ? 'text-orange-500' 
-                  : 'text-[#a0a0a0] hover:text-orange-500'
-              }`}
-            >
+            <Link to="/contact" className={navLinkClass('/contact')}>
               Contact
             </Link>
           </div>
 
-          {/* Right side - Theme Toggle and Wallet */}
-          <div className="flex items-center space-x-4">
-            {/* Theme Toggle */}
+          {/* Right side — wallet */}
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <button
-              onClick={toggleTheme}
-              className="p-2 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] text-[#a0a0a0] hover:text-orange-500 hover:border-orange-500/30 transition-all"
-              aria-label="Toggle theme"
+              type="button"
+              className="md:hidden p-2 rounded-xl bg-[#1a1a1a] border border-[#2a2a2a] text-[#a0a0a0] hover:text-orange-500"
+              onClick={() => setMobileOpen((o) => !o)}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-nav"
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             >
-              {theme === 'dark' ? <FaSun size={18} /> : <FaMoon size={18} />}
+              {mobileOpen ? <FaTimes size={18} /> : <FaBars size={18} />}
             </button>
 
-            {/* RainbowKit Connect Button - Keep existing code */}
+            {hasWalletConnectProjectId ? (
             <ConnectButton.Custom>
               {({
                 account,
@@ -196,8 +178,35 @@ export function Navbar() {
                 )
               }}
             </ConnectButton.Custom>
+            ) : (
+              <InjectedWalletControls />
+            )}
           </div>
         </div>
+
+        {/* Mobile nav */}
+        {mobileOpen && (
+          <div
+            id="mobile-nav"
+            className="md:hidden mt-4 pb-2 flex flex-col gap-3 border-t border-[#2a2a2a] pt-4"
+          >
+            <Link to="/" className={navLinkClass('/')} onClick={() => setMobileOpen(false)}>
+              Dashboard
+            </Link>
+            <Link to="/docs" className={navLinkClass('/docs')} onClick={() => setMobileOpen(false)}>
+              Docs
+            </Link>
+            <Link to="/faq" className={navLinkClass('/faq')} onClick={() => setMobileOpen(false)}>
+              FAQ
+            </Link>
+            <Link to="/about" className={navLinkClass('/about')} onClick={() => setMobileOpen(false)}>
+              About
+            </Link>
+            <Link to="/contact" className={navLinkClass('/contact')} onClick={() => setMobileOpen(false)}>
+              Contact
+            </Link>
+          </div>
+        )}
       </div>
     </nav>
   )

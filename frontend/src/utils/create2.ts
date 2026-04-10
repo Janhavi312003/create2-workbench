@@ -1,35 +1,33 @@
-import { ethers } from 'ethers';
+import { ethers } from "ethers";
 
 export function calculateCreate2Address(
   deployerAddress: string,
   salt: string,
-  initCodeHash: string
+  initCodeHash: string,
 ): string {
   try {
-    // Ensure salt is 32 bytes
     const saltBytes32 = ethers.zeroPadValue(salt, 32);
-    
-    // Pack: 0xff ++ address ++ salt ++ initCodeHash
+
     const create2Inputs = ethers.solidityPacked(
-      ['bytes1', 'address', 'bytes32', 'bytes32'],
-      ['0xff', deployerAddress, saltBytes32, initCodeHash]
+      ["bytes1", "address", "bytes32", "bytes32"],
+      ["0xff", deployerAddress, saltBytes32, initCodeHash],
     );
-    
-    // Hash and take last 20 bytes
+
     const hash = ethers.keccak256(create2Inputs);
-    const address = '0x' + hash.slice(-40);
-    
+    const address = "0x" + hash.slice(-40);
+
     return ethers.getAddress(address);
-  } catch (error) {
-    throw new Error('Invalid input parameters');
+  } catch {
+    throw new Error("Invalid input parameters");
   }
 }
 
 export function hashInitCode(bytecode: string): string {
-  if (!bytecode.startsWith('0x')) {
-    bytecode = '0x' + bytecode;
+  let normalized = bytecode.trim();
+  if (!normalized.startsWith("0x")) {
+    normalized = "0x" + normalized;
   }
-  return ethers.keccak256(bytecode);
+  return ethers.keccak256(normalized);
 }
 
 export function isValidAddress(address: string): boolean {
@@ -41,6 +39,17 @@ export function isValidAddress(address: string): boolean {
   }
 }
 
-export function isValidHex(hex: string): boolean {
-  return /^0x[0-9A-Fa-f]*$/.test(hex);
+/** Non-empty `0x` hex with even number of nibbles (at least one byte). */
+export function isValidHex(s: string): boolean {
+  if (!s.startsWith("0x")) return false;
+  const body = s.slice(2);
+  if (body.length === 0) return false;
+  if (body.length % 2 !== 0) return false;
+  return /^[0-9a-fA-F]+$/.test(body);
+}
+
+/** Prefix while typing — allows odd length after `0x`. */
+export function isValidHexPrefixLoose(value: string): boolean {
+  if (!value.startsWith("0x")) return false;
+  return /^0x[0-9a-fA-F]*$/.test(value);
 }

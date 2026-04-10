@@ -46,55 +46,83 @@ function App() {
       {/* Rootstock-inspired subtle backdrop */}
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(900px_420px_at_15%_-10%,rgba(91,108,255,0.18),transparent_60%),radial-gradient(700px_360px_at_88%_12%,rgba(255,102,0,0.12),transparent_55%),radial-gradient(900px_520px_at_50%_115%,rgba(120,80,255,0.10),transparent_60%)]" />
       <Navbar />
-      
+
+      <main id="main-content" className="flex-grow w-full min-w-0">
       <Routes>
         <Route path="/" element={
           <div className="rs-page flex-grow">
             {/* Header */}
             <header className="text-center mb-8">
-              <div className="flex justify-between items-start mb-6">
-                <div className="flex-1"></div>
-                <div className="flex-1">
-                  <p className="text-xl md:text-2xl text-orange-300/90 font-semibold max-w-2xl mx-auto drop-shadow-lg">
-                    Deterministic Contract Deployment Tool for Rootstock
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+                <div className="flex-1 hidden sm:block" aria-hidden />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm md:text-base text-[#a0a0a0] font-normal max-w-2xl mx-auto leading-relaxed">
+                    Deterministic contract deployment for Rootstock — predict
+                    addresses (CREATE2) or mine a vanity salt.
                   </p>
                 </div>
-                <div className="flex-1 flex justify-end">
-                  {/* Deployed Contracts Toggle */}
+                <div className="flex-1 flex justify-center sm:justify-end">
                   {deployedContracts.length > 0 && (
                     <button
+                      type="button"
                       onClick={() => setShowDeployedList(!showDeployedList)}
-                      className="rs-btn px-4 py-2 text-orange-300 hover:text-orange-200"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] px-3 py-2 text-sm font-medium text-[#a0a0a0] hover:border-orange-500/40 hover:text-orange-300 transition-colors"
                     >
-                      <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                      {deployedContracts.length} Deployed
+                      <span className="h-2 w-2 rounded-full bg-green-500" />
+                      {deployedContracts.length} deployed
                     </button>
                   )}
                 </div>
               </div>
             </header>
 
-            {/* Tab Bar */}
-            <div className="rs-panel p-1 flex mb-8">
+            {/* Mode switch — compact labels, Rootstock-style bar */}
+            <div
+              className="mb-8 flex flex-col gap-1 rounded-2xl border border-[#2a2a2a] bg-black/50 p-1 sm:flex-row"
+              role="tablist"
+              aria-label="Workbench mode"
+            >
               <button
-                className={`flex-1 py-4 rounded-2xl text-base md:text-lg font-bold transition-all duration-300 ${
+                type="button"
+                role="tab"
+                aria-selected={activeMode === "calculate"}
+                className={`rounded-xl px-3 py-2.5 text-left transition-colors sm:flex-1 sm:text-center ${
                   activeMode === "calculate"
-                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-2xl shadow-orange-500/40 transform scale-105"
-                    : "text-orange-200/90 hover:bg-white/5 hover:text-orange-200"
+                    ? "bg-[#FF6600] text-white shadow-[0_0_0_1px_rgba(255,102,0,0.35)]"
+                    : "text-[#a0a0a0] hover:bg-white/[0.04] hover:text-white"
                 }`}
                 onClick={() => setActiveMode("calculate")}
               >
-                Calculate Address
+                <span className="block text-sm font-medium">Calculate</span>
+                <span
+                  className={`mt-0.5 block text-xs font-normal ${
+                    activeMode === "calculate"
+                      ? "text-white/85"
+                      : "text-[#a0a0a0]"
+                  }`}
+                >
+                  Predict CREATE2 address
+                </span>
               </button>
               <button
-                className={`flex-1 py-4 rounded-2xl text-base md:text-lg font-bold transition-all duration-300 ${
+                type="button"
+                role="tab"
+                aria-selected={activeMode === "find"}
+                className={`rounded-xl px-3 py-2.5 text-left transition-colors sm:flex-1 sm:text-center ${
                   activeMode === "find"
-                    ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-2xl shadow-orange-500/40 transform scale-105"
-                    : "text-orange-200/90 hover:bg-white/5 hover:text-orange-200"
+                    ? "bg-[#FF6600] text-white shadow-[0_0_0_1px_rgba(255,102,0,0.35)]"
+                    : "text-[#a0a0a0] hover:bg-white/[0.04] hover:text-white"
                 }`}
                 onClick={() => setActiveMode("find")}
               >
-                Find Vanity Salt
+                <span className="block text-sm font-medium">Find salt</span>
+                <span
+                  className={`mt-0.5 block text-xs font-normal ${
+                    activeMode === "find" ? "text-white/85" : "text-[#a0a0a0]"
+                  }`}
+                >
+                  Vanity prefix search
+                </span>
               </button>
             </div>
 
@@ -129,8 +157,11 @@ function App() {
                 </div>
                 
                 <div className="space-y-6">
-                  {deployedContracts.map((contract, index) => (
-                    <div key={index} className="border rounded-2xl overflow-hidden border-white/10">
+                  {deployedContracts.map((contract) => (
+                    <div
+                      key={`${contract.address}-${contract.timestamp}`}
+                      className="border rounded-2xl overflow-hidden border-white/10"
+                    >
                       <div className="bg-white/5 p-4 border-b border-white/10">
                         <div className="flex items-center justify-between">
                           <span className="text-orange-400 font-mono text-sm">
@@ -155,6 +186,7 @@ function App() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/contact" element={<Contact />} />
       </Routes>
+      </main>
 
       <Footer />
     </div>

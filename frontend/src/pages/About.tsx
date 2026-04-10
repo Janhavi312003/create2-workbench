@@ -90,7 +90,7 @@ export function About() {
           <div>
             <h3 className="text-xl font-bold text-white mb-4">Frontend</h3>
             <ul className="space-y-3 rs-muted">
-              <li className="flex items-center gap-2">• React 18 with TypeScript</li>
+              <li className="flex items-center gap-2">• React 19 with TypeScript</li>
               <li className="flex items-center gap-2">• Vite for lightning-fast builds</li>
               <li className="flex items-center gap-2">• Tailwind CSS for styling</li>
               <li className="flex items-center gap-2">• ethers.js v6 for blockchain interaction</li>
@@ -103,7 +103,7 @@ export function About() {
               <li className="flex items-center gap-2">• Solidity 0.8.20</li>
               <li className="flex items-center gap-2">• Foundry development framework</li>
               <li className="flex items-center gap-2">• EIP-1014 CREATE2 implementation</li>
-              <li className="flex items-center gap-2">• OpenZeppelin secure libraries</li>
+              <li className="flex items-center gap-2">• Minimal audited patterns (reentrancy guard in-factory)</li>
               <li className="flex items-center gap-2">• Comprehensive test suite</li>
             </ul>
           </div>

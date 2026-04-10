@@ -2,8 +2,16 @@ import { useState, useRef, useEffect } from "react";
 import { useAccount, useChainId, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { config } from "./Providers";
-import { isValidAddress } from "../utils/create2";
+import {
+  isValidAddress,
+  isValidHex,
+  isValidHexPrefixLoose,
+} from "../utils/create2";
 import { factoryConfig } from "../utils/contracts";
+import {
+  exampleContracts,
+  SIMPLE_STORAGE_INIT_CODE_HASH,
+} from "../utils/exampleContracts";
 import {
   FaSearch,
   FaStop,
@@ -17,38 +25,23 @@ import {
   FaCode,
   FaExternalLinkAlt,
 } from "react-icons/fa";
-import { BsLightningCharge, BsHourglassSplit } from "react-icons/bs";
-import { exampleContracts } from "../utils/exampleContracts";
-
-const isValidHex = (value: string): boolean => {
-  if (!value.startsWith("0x")) return false;
-  const hexPart = value.slice(2);
-  const hexRegex = /^[0-9a-fA-F]+$/;
-  if (!hexRegex.test(hexPart)) return false;
-  if (hexPart.length % 2 !== 0) return false;
-  return true;
-};
-
-const isValidHexPrefix = (value: string): boolean => {
-  if (!value.startsWith("0x")) return false;
-  const hexPart = value.slice(2);
-  const hexRegex = /^[0-9a-fA-F]+$/;
-  return hexRegex.test(hexPart);
-};
+import { BsHourglassSplit } from "react-icons/bs";
 
 interface FindSaltModeProps {
   onDeploySuccess?: (address: `0x${string}`) => void;
 }
 
 export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
-  const factoryAddress = factoryConfig.address;
+  const envFactory = factoryConfig.address;
   const { isConnected } = useAccount();
   const chainId = useChainId();
 
   // Form states
-  const [deployerAddress, setDeployerAddress] = useState<string>(factoryAddress);
-  const [initCodeHash, setInitCodeHash] = useState(
-    "0x8f0ef1f921db5807d80fd113060720b50e76aa0123aeef09682060439f5b8d5e",
+  const [deployerAddress, setDeployerAddress] = useState<string>(
+    envFactory ?? "",
+  );
+  const [initCodeHash, setInitCodeHash] = useState<string>(
+    SIMPLE_STORAGE_INIT_CODE_HASH,
   );
   const [prefix, setPrefix] = useState("0x0000");
   const [bytecode, setBytecode] = useState("");
@@ -156,7 +149,7 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
       setError("Init code hash must be valid 0x hex (exactly 66 chars)");
       return;
     }
-    if (!prefix.trim() || !isValidHexPrefix(prefix)) {
+    if (!prefix.trim() || !isValidHexPrefixLoose(prefix)) {
       setError("Prefix must be a valid hex value starting with 0x");
       return;
     }
@@ -173,12 +166,22 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
       { type: "module" },
     );
 
+    const rand = new Uint8Array(16);
+    crypto.getRandomValues(rand);
+    const startNonceHex =
+      "0x" +
+      [...rand].map((b) => b.toString(16).padStart(2, "0")).join("");
+    const startNonce = BigInt(startNonceHex).toString();
+
     workerRef.current.postMessage({
-      deployerAddress,
-      initCodeHash,
-      prefix,
-      startNonce: 0,
-      maxIterations: 1000000,
+      type: "run",
+      payload: {
+        deployerAddress,
+        initCodeHash,
+        prefix,
+        startNonce,
+        maxIterations: 1000000,
+      },
     });
 
     workerRef.current.onmessage = (e) => {
@@ -247,16 +250,16 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
   };
 
   const stopSearch = () => {
+    workerRef.current?.postMessage({ type: "cancel" });
     workerRef.current?.terminate();
+    workerRef.current = null;
     setIsSearching(false);
     setStatusMessage("⏸️ Search stopped");
   };
 
   const resetForm = () => {
-    setDeployerAddress(factoryAddress);
-    setInitCodeHash(
-      "0x8f0ef1f921db5807d80fd113060720b50e76aa0123aeef09682060439f5b8d5e",
-    );
+    setDeployerAddress(envFactory ?? "");
+    setInitCodeHash(SIMPLE_STORAGE_INIT_CODE_HASH);
     setPrefix("0x0000");
     setBytecode("");
     setError("");
@@ -341,7 +344,7 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
         address: deployerAddress as `0x${string}`,
         abi: factoryConfig.abi,
         functionName: "deploy",
-        args: [foundSalt, bytecode],
+        args: [foundSalt as `0x${string}`, bytecode as `0x${string}`],
       });
 
       setTxHash(hash);
@@ -401,40 +404,45 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
 
   // Get bytecode from SimpleStorage (like GetInfo.s.sol)
   const getSimpleStorageBytecode = () => {
-    // This is the bytecode from compiled SimpleStorage
-    setBytecode(
-      "0x608060405234801561001057600080fd5b5061012f806100206000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80632e64cec114602d575b600080fd5b60336047565b604051603e9190605d565b60405180910390f35b60008054905090565b6057816076565b82525050565b6000602082019050607060008301846050565b92915050565b600081905091905056fea2646970667358221220123456789abcdef",
-    );
+    setBytecode(exampleContracts.simpleStorage.bytecode);
   };
 
   const isLoading = isWritePending || isTxLoading;
 
   return (
     <div className="rs-panel-strong p-8">
-      {/* Header */}
-      <div className="flex items-center mb-6 group">
-        <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-yellow-600 rounded-2xl flex items-center justify-center mr-4 shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-          <span className="text-2xl font-black text-white drop-shadow-lg">
-            <FaSearch />
-          </span>
+      <div className="rs-wb-head">
+        <div className="rs-wb-icon" aria-hidden>
+          <FaSearch className="text-lg" />
         </div>
         <div>
-          <h2 className="text-2xl font-black bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-500 bg-clip-text text-transparent tracking-tight drop-shadow-xl">
-            Find Vanity Salt
-          </h2>
-          <p className="text-orange-300/80 text-lg font-medium flex items-center gap-2">
-            <BsLightningCharge className="text-yellow-500" />
-            Generate a salt for your desired contract address prefix
+          <h2 className="rs-wb-title">Find salt</h2>
+          <p className="rs-wb-desc">
+            Search for a salt so the CREATE2 address matches your hex prefix.
           </p>
         </div>
       </div>
 
       {/* Connection Status */}
       {!isConnected && (
-        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-2xl">
-          <p className="text-blue-300 flex items-center gap-2">
-            <FaInfoCircle />
-            Connect wallet to deploy contracts after finding a salt
+        <div className="rs-wb-callout mb-6">
+          <p className="flex items-center gap-2 text-sm text-[#a0a0a0]">
+            <FaInfoCircle className="shrink-0 text-[#FF6600]" aria-hidden />
+            Connect a wallet to deploy after you find a salt.
+          </p>
+        </div>
+      )}
+
+      {!envFactory && (
+        <div
+          className="mb-6 p-4 rounded-2xl border border-amber-500/40 bg-amber-500/10"
+          role="status"
+        >
+          <p className="text-amber-100 text-sm leading-relaxed">
+            No <code className="font-mono text-amber-200">VITE_FACTORY_ADDRESS</code>{" "}
+            in <code className="font-mono text-amber-200">.env</code>. Paste your
+            deployed Create2 factory address above (the app does not assume a
+            testnet default).
           </p>
         </div>
       )}
@@ -445,34 +453,27 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
         prefix.length > 2 &&
         !error &&
         !foundSalt && (
-          <div className="mb-6 p-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl border border-purple-500/30 backdrop-blur-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FaTachometerAlt className="text-purple-400" />
-                <span className="text-purple-300 font-medium">
-                  Search Difficulty:
-                </span>
+          <div className="rs-wb-callout mb-6">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-sm text-[#a0a0a0]">
+                <FaTachometerAlt className="text-[#FF6600]" aria-hidden />
+                <span>Search space (approx.)</span>
               </div>
-              <div className="flex items-center gap-4">
-                <span className="text-white font-mono font-bold">
-                  {prefixDifficulty} possible combinations
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-sm text-white">
+                  ~{prefixDifficulty}
                 </span>
-                <span className="text-xs px-2 py-1 bg-purple-500/20 rounded-full text-purple-300">
-                  {prefix.length - 2} chars
-                </span>
+                <span className="rs-wb-badge">{prefix.length - 2} hex chars</span>
               </div>
             </div>
           </div>
         )}
 
-      {/* Main Form */}
-      <div className="space-y-6 rs-panel p-7 mb-8">
+      <div className="rs-panel mb-8 space-y-5 p-5 sm:p-6">
         <div>
-          <label className="text-sm font-bold text-orange-300 mb-3 tracking-wide uppercase bg-gray-800/50 px-3 py-1 rounded-xl inline-flex items-center border border-orange-500/30">
-            Factory Address
-            <span className="text-xs bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded-full font-mono ml-2">
-              VITE_FACTORY_ADDRESS
-            </span>
+          <label className="rs-wb-label">
+            Factory address{" "}
+            <span className="rs-wb-badge">CREATE2 deployer</span>
           </label>
           <input
             type="text"
@@ -480,42 +481,37 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
             value={deployerAddress}
             onChange={(e) => setDeployerAddress(e.target.value)}
             disabled={isSearching}
-            className="w-full p-5 rounded-2xl border-2 border-white/10 focus:border-orange-500 focus:ring-4 focus:ring-orange-400/20 font-mono text-lg bg-black/30 backdrop-blur-sm text-white placeholder-white/40 disabled:bg-black/20 disabled:cursor-not-allowed shadow-xl hover:shadow-orange-500/10 transition-all duration-300 hover:border-white/15"
+            className="rs-wb-input-mono disabled:opacity-60"
           />
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-bold text-orange-300 tracking-wide uppercase bg-gray-800/50 px-3 py-1 rounded-xl inline-flex items-center border border-orange-500/30">
-              Init Code Hash
-              <span className="text-xs bg-orange-500/20 text-orange-300 px-2 py-0.5 rounded-full font-mono ml-2">
-                from Init Code Helper
-              </span>
+          <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+            <label className="rs-wb-label mb-0">
+              Init code hash <span className="rs-wb-badge">bytes32</span>
             </label>
             <button
+              type="button"
               onClick={handleCopyHash}
-              className="text-xs text-gray-400 hover:text-orange-400 flex items-center gap-1"
+              className="text-xs font-medium text-[#a0a0a0] hover:text-[#FF6600] flex items-center gap-1"
             >
               {copiedHash ? <FaCheck /> : <FaCopy />}
-              {copiedHash ? "Copied!" : "Copy"}
+              {copiedHash ? "Copied" : "Copy"}
             </button>
           </div>
           <div className="relative">
             <input
               type="text"
-              placeholder="0x96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f"
+              placeholder="0x…"
               value={initCodeHash}
               onChange={(e) => setInitCodeHash(e.target.value)}
               disabled={isSearching}
-              className="w-full p-5 rounded-2xl border-2 border-white/10 focus:border-orange-500 focus:ring-4 focus:ring-orange-400/20 font-mono text-lg bg-black/30 backdrop-blur-sm text-white placeholder-white/40 disabled:bg-black/20 disabled:cursor-not-allowed shadow-xl hover:shadow-orange-500/10 transition-all duration-300 hover:border-white/15 pr-24"
+              className="rs-wb-input-mono pr-20 disabled:opacity-60"
             />
             <button
-              onClick={() =>
-                setInitCodeHash(
-                  "0x8f0ef1f921db5807d80fd113060720b50e76aa0123aeef09682060439f5b8d5e",
-                )
-              }
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-gray-700 rounded-lg text-xs text-gray-300 hover:bg-gray-600 transition-colors"
+              type="button"
+              onClick={() => setInitCodeHash(SIMPLE_STORAGE_INIT_CODE_HASH)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] px-2.5 py-1 text-xs font-medium text-[#a0a0a0] hover:text-white"
             >
               Reset
             </button>
@@ -523,49 +519,49 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
         </div>
 
         <div>
-          <label className="text-sm font-bold text-orange-300 mb-3 tracking-wide uppercase bg-gray-800/50 px-3 py-1 rounded-xl inline-flex items-center border border-orange-500/30">
-            Desired Prefix
-          </label>
+          <label className="rs-wb-label">Address prefix</label>
           <input
             type="text"
-            placeholder="0x0000beef"
+            placeholder="0x0000"
             value={prefix}
             onChange={(e) => setPrefix(e.target.value)}
             disabled={isSearching}
-            className="w-full p-5 rounded-2xl border-2 border-white/10 focus:border-orange-500 focus:ring-4 focus:ring-orange-400/20 font-mono text-lg bg-black/30 backdrop-blur-sm text-white placeholder-white/40 disabled:bg-black/20 disabled:cursor-not-allowed shadow-xl hover:shadow-orange-500/10 transition-all duration-300 hover:border-white/15"
+            className="rs-wb-input-mono disabled:opacity-60"
           />
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-4 mb-8">
+      <div className="mb-8 flex gap-2">
         <button
+          type="button"
           onClick={isSearching ? stopSearch : startSearch}
           disabled={!deployerAddress || !initCodeHash || !prefix}
-          className={`flex-1 py-6 rounded-3xl font-black text-xl shadow-2xl transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] backdrop-blur-sm border-2 flex items-center justify-center gap-3 ${
+          className={`flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium transition-colors ${
             isSearching
-              ? "bg-gradient-to-r from-red-600/80 to-orange-600/80 text-white hover:from-red-700/90 hover:to-orange-700/90 border-red-500/50 shadow-red-500/30"
-              : "bg-gradient-to-r from-orange-500/90 via-yellow-500/80 to-orange-600/90 text-white hover:from-orange-600/100 hover:via-yellow-600/90 hover:to-orange-700/100 border-orange-500/60 shadow-orange-500/50 disabled:from-gray-800/50 disabled:to-gray-900/50 disabled:shadow-none disabled:cursor-not-allowed disabled:text-gray-500"
+              ? "border-red-500/40 bg-red-950/40 text-red-200 hover:bg-red-950/60"
+              : "rs-wb-btn-accent disabled:cursor-not-allowed disabled:opacity-40"
           }`}
         >
           {isSearching ? (
             <>
-              <FaStop />
-              Stop Mining
+              <FaStop aria-hidden />
+              Stop
             </>
           ) : (
             <>
-              <FaSearch />
-              Start Search
+              <FaSearch aria-hidden />
+              Search
             </>
           )}
         </button>
 
         <button
+          type="button"
           onClick={resetForm}
           disabled={isSearching}
-          className="px-6 py-6 rounded-3xl bg-gray-800/50 text-gray-300 font-black text-xl hover:bg-gray-700/50 shadow-xl border border-gray-700 transform hover:scale-105 active:scale-95 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Reset to defaults"
+          className="rs-wb-btn-ghost min-h-[44px] px-4 disabled:cursor-not-allowed disabled:opacity-50"
+          title="Reset"
+          aria-label="Reset form"
         >
           <FaTrash />
         </button>
@@ -573,72 +569,68 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
 
       {/* Progress & Stats */}
       {isSearching && (
-        <div className="mt-6 p-6 bg-gray-900/40 backdrop-blur-xl rounded-3xl border border-orange-500/30 shadow-2xl shadow-orange-500/20">
-          <div className="flex justify-between items-center mb-4">
-            <div className="flex items-center gap-2">
-              <BsHourglassSplit className="text-orange-400 animate-pulse" />
-              <span className="text-orange-300 font-medium">Searching...</span>
+        <div className="rs-wb-output">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-sm text-[#a0a0a0]">
+              <BsHourglassSplit className="animate-pulse text-[#FF6600]" aria-hidden />
+              Searching…
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-400">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-[#a0a0a0]">
+              <span>
                 Speed:{" "}
-                <span className="text-orange-400 font-mono font-bold">
+                <span className="font-mono text-white">
                   {searchSpeed.toLocaleString()}
-                </span>{" "}
-                salts/sec
+                </span>
+                /s
               </span>
               {estimatedTime && (
-                <span className="text-sm text-gray-400">
+                <span>
                   ETA:{" "}
-                  <span className="text-yellow-400 font-mono">
-                    {estimatedTime}
-                  </span>
+                  <span className="font-mono text-white">{estimatedTime}</span>
                 </span>
               )}
             </div>
           </div>
 
-          <div className="w-full bg-gray-800/50 rounded-2xl h-12 overflow-hidden shadow-inner border border-gray-700/50">
+          <div className="h-2 w-full overflow-hidden rounded-full border border-[#2a2a2a] bg-black/50">
             <div
-              className="bg-gradient-to-r from-orange-500 via-yellow-500 to-orange-600 h-12 rounded-2xl shadow-xl flex items-center justify-end pr-6 transition-all duration-500 font-mono font-bold text-lg text-white drop-shadow-2xl"
+              className="h-full rounded-full bg-[#FF6600] transition-[width] duration-300"
               style={{ width: `${progress}%` }}
-            >
-              {progress}%
-            </div>
+            />
           </div>
 
-          <div className="mt-3 text-center text-sm text-gray-400">
-            Checked {iterations.toLocaleString()} salts
-          </div>
+          <p className="mt-2 text-center text-xs text-[#a0a0a0]">
+            Tried {iterations.toLocaleString()} salts
+          </p>
         </div>
       )}
 
       {/* Status Message */}
       {statusMessage && !foundSalt && (
-        <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-400/40 backdrop-blur-sm rounded-2xl shadow-xl">
-          <div className="flex items-center gap-3">
-            <FaInfoCircle className="text-yellow-400 text-xl" />
-            <div className="text-yellow-200 font-medium">{statusMessage}</div>
+        <div className="rs-wb-callout mt-6 border-amber-500/20">
+          <div className="flex items-start gap-2 text-sm text-[#a0a0a0]">
+            <FaInfoCircle className="mt-0.5 shrink-0 text-amber-500/90" aria-hidden />
+            {statusMessage}
           </div>
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="mt-6 p-4 bg-red-500/10 border border-red-400/40 backdrop-blur-sm rounded-2xl shadow-xl max-w-full">
-          <div className="flex items-start gap-3">
-            <FaExclamationTriangle className="text-red-400 text-xl flex-shrink-0 mt-0.5" />
+        <div className="rs-wb-callout mt-6 max-w-full border-red-500/35">
+          <div className="flex items-start gap-2">
+            <FaExclamationTriangle className="mt-0.5 shrink-0 text-red-400" aria-hidden />
             <div className="min-w-0 flex-1">
-              <div className="text-red-200 font-medium break-words overflow-hidden">
+              <p className="text-sm font-medium text-red-200 break-words">
                 {error}
-              </div>
+              </p>
 
               {errorDetails && (
                 <details className="mt-3">
-                  <summary className="cursor-pointer text-sm text-red-300/90 hover:text-red-200 transition-colors">
-                    Show technical details
+                  <summary className="cursor-pointer text-xs text-red-300/90 hover:text-red-200">
+                    Technical details
                   </summary>
-                  <pre className="mt-3 max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-xl border border-red-400/20 bg-black/30 p-3 text-xs text-red-100/90">
+                  <pre className="rs-wb-code mt-2 max-w-full overflow-x-auto border-red-500/20 bg-black/40 p-3 text-xs text-red-100/90">
                     {errorDetails}
                   </pre>
                 </details>
@@ -650,76 +642,78 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
 
       {/* Found Salt Section - Deployment UI */}
       {foundSalt && foundAddress && showDeploy && (
-        <div className="mt-8 p-8 bg-gradient-to-br from-emerald-500/15 via-green-500/10 to-emerald-500/15 border-4 border-emerald-400/50 backdrop-blur-xl rounded-3xl shadow-2xl shadow-emerald-500/30 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-          <div className="flex items-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-r from-emerald-500 to-green-600 rounded-2xl flex items-center justify-center mr-6 shadow-2xl shadow-emerald-500/50 animate-pulse">
-              <span className="text-3xl font-black text-white drop-shadow-2xl">
-                ✅
+        <div className="rs-wb-output mt-8">
+          <div className="rs-wb-head mb-4">
+            <div
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-emerald-500/35 bg-emerald-950/30 text-lg text-emerald-400"
+              aria-hidden
+            >
+              ✓
+            </div>
+            <div>
+              <h3 className="rs-wb-title">Match found</h3>
+              <p className="rs-wb-desc">
+                {iterations.toLocaleString()} iterations — deploy with the salt
+                and bytecode below.
+              </p>
+            </div>
+          </div>
+
+          <div className="mb-6 space-y-3">
+            <div>
+              <span className="text-xs font-medium uppercase tracking-wide text-[#a0a0a0]">
+                Factory
               </span>
+              <code className="rs-wb-code mt-1 block text-[#FF6600]">
+                {deployerAddress}
+              </code>
             </div>
             <div>
-              <h3 className="text-3xl font-black bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-500 bg-clip-text text-transparent tracking-tight drop-shadow-2xl">
-                VANITY ADDRESS FOUND!
-              </h3>
-              <p className="text-emerald-200 font-bold text-lg">
-                Ready for Rootstock deployment • {iterations.toLocaleString()}{" "}
-                iterations
-              </p>
+              <span className="text-xs font-medium uppercase tracking-wide text-[#a0a0a0]">
+                Salt
+              </span>
+              <code className="rs-wb-code mt-1 block">{foundSalt}</code>
+            </div>
+            <div>
+              <span className="text-xs font-medium uppercase tracking-wide text-[#a0a0a0]">
+                Address
+              </span>
+              <code className="rs-wb-code mt-1 block">{foundAddress}</code>
             </div>
           </div>
 
-          {/* Display Info like TestCreate2.s.sol */}
-          <div className="space-y-4 mb-8 p-6 bg-gray-900/60 backdrop-blur-xl rounded-3xl border-2 border-emerald-400/40">
-            <div>
-              <span className="text-sm text-gray-400">Factory Address:</span>
-              <p className="font-mono text-orange-400 break-all">
-                {factoryAddress}
-              </p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-400">Salt:</span>
-              <p className="font-mono text-orange-400 break-all">{foundSalt}</p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-400">Predicted Address:</span>
-              <p className="font-mono text-orange-400 break-all">
-                {foundAddress}
-              </p>
-            </div>
-          </div>
-
-          {/* Bytecode Input Section */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <label className="text-xl font-bold text-emerald-300 flex items-center gap-2">
-                <FaCode />
-                Contract Bytecode
+          <div className="mb-6">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <label className="rs-wb-label mb-0 flex items-center gap-2">
+                <FaCode aria-hidden />
+                Bytecode
               </label>
               <button
+                type="button"
                 onClick={getSimpleStorageBytecode}
-                className="px-4 py-2 bg-gray-800 rounded-xl text-sm text-orange-400 hover:bg-gray-700 transition-colors border border-gray-700"
+                className="rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] px-3 py-1.5 text-xs font-medium text-[#a0a0a0] hover:text-[#FF6600]"
               >
-                📋 Load SimpleStorage Example
+                Load SimpleStorage example
               </button>
             </div>
 
             <textarea
               value={bytecode}
               onChange={(e) => setBytecode(e.target.value)}
-              placeholder="0x608060405234801561001057600080fd5b50..."
-              className="w-full p-5 bg-gray-800 border-2 border-gray-700 rounded-2xl text-white font-mono text-sm focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/30 transition-all"
+              placeholder="0x6080…"
+              className="rs-wb-input-mono min-h-[7rem] resize-y"
               rows={5}
             />
 
-            <p className="text-xs text-gray-400 mt-2">
-              ℹ️ Get bytecode from:{" "}
-              <code className="bg-gray-800 px-2 py-1 rounded">
-                forge inspect SimpleStorage bytecode
+            <p className="mt-2 text-xs text-[#a0a0a0]">
+              From{" "}
+              <code className="font-mono text-white/80">
+                forge inspect &lt;Contract&gt; bytecode
               </code>
             </p>
           </div>
 
-          <div className="flex gap-2 mb-4">
+          <div className="mb-4 flex flex-wrap gap-2">
             <select
               value={selectedExample}
               onChange={(e) => {
@@ -727,13 +721,13 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
                 setSelectedExample(next);
                 loadExampleBytecode(next);
               }}
-              className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-xl text-white text-sm"
+              className="rs-wb-input-mono max-w-full py-2 text-sm"
             >
-              <option value="">Load example contract...</option>
+              <option value="">Example contract…</option>
               {Object.entries(exampleContracts).map(
                 ([key, { name, description }]) => (
                   <option key={key} value={key}>
-                    {name} - {description}
+                    {name} — {description}
                   </option>
                 ),
               )}
@@ -742,167 +736,123 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
               href="https://remix.ethereum.org/"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-4 py-2 bg-blue-600/20 border border-blue-500/30 rounded-xl text-blue-300 text-sm flex items-center gap-2 hover:bg-blue-600/30 transition-colors"
+              className="rs-wb-btn-ghost text-xs"
             >
-              <FaExternalLinkAlt /> Remix IDE
+              <FaExternalLinkAlt aria-hidden /> Remix
             </a>
           </div>
 
-          {/* Deploy Button */}
           <button
+            type="button"
             onClick={handleDeploy}
             disabled={!isConnected || !bytecode || isLoading || isDeploySuccess}
-            className="w-full py-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black text-xl rounded-2xl hover:from-orange-600 hover:to-orange-700 shadow-2xl shadow-orange-500/50 transform hover:scale-105 active:scale-95 transition-all duration-300 border border-orange-400/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3"
+            className="rs-wb-btn-accent mb-6 w-full py-3 text-sm disabled:cursor-not-allowed disabled:opacity-50"
           >
             {!isConnected && (
               <>
-                <FaInfoCircle />
-                Connect Wallet to Deploy
+                <FaInfoCircle aria-hidden />
+                Connect wallet
               </>
             )}
             {isConnected && deployStep === "idle" && !isDeploySuccess && (
               <>
-                <FaRocket />
-                Deploy Contract (Gas Required)
+                <FaRocket aria-hidden />
+                Deploy
               </>
             )}
             {isConnected && deployStep === "preparing" && (
-              <>
-                <span className="animate-spin">⏳</span>
-                Preparing Transaction...
-              </>
+              <>Preparing…</>
             )}
             {isConnected && deployStep === "deploying" && (
-              <>
-                <span className="animate-spin">📦</span>
-                Deploying...
-              </>
+              <>Deploying…</>
             )}
             {isConnected && isDeploySuccess && (
               <>
-                <FaCheck />
-                Deployed Successfully!
+                <FaCheck aria-hidden />
+                Done
               </>
             )}
           </button>
 
           {/* Transaction Status */}
           {txHash && (
-            <div className="mt-6 p-5 bg-gray-900/60 rounded-2xl border border-gray-700">
-              <p className="text-sm text-gray-400 mb-2">Transaction Hash:</p>
-              <div className="flex items-center gap-3">
-                <code className="flex-1 font-mono text-sm text-orange-400 bg-gray-800/80 p-3 rounded-xl truncate">
+            <div className="rs-wb-callout mb-6">
+              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#a0a0a0]">
+                Transaction
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <code className="rs-wb-code flex-1 min-w-0 text-[13px]">
                   {txHash}
                 </code>
                 <a
                   href={`https://explorer.testnet.rsk.co/tx/${txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-3 bg-gray-800 rounded-xl text-orange-400 hover:bg-gray-700 transition-colors flex items-center gap-2"
+                  className="rs-wb-btn-ghost shrink-0 py-2 text-xs"
                 >
-                  <FaExternalLinkAlt />
-                  View
+                  <FaExternalLinkAlt aria-hidden /> Explorer
                 </a>
               </div>
             </div>
           )}
 
-          {/* Success Message */}
           {isDeploySuccess && (
-            <div className="mt-6 p-6 bg-emerald-500/20 rounded-2xl border-2 border-emerald-500/50">
-              <p className="text-emerald-400 font-bold text-xl flex items-center gap-3 mb-3">
-                <FaCheck className="text-2xl" />✅ SUCCESS: Contract Deployed!
+            <div className="rs-wb-callout mb-6 border-emerald-500/25">
+              <p className="flex items-center gap-2 text-sm font-medium text-white">
+                <FaCheck className="text-emerald-400" aria-hidden />
+                Deployed — address matches prediction.
               </p>
-              <p className="text-emerald-300">Address matches prediction ✓</p>
-              <p className="text-sm text-gray-400 mt-3">
-                You can now interact with your contract using the store() and
-                retrieve() functions.
+              <p className="mt-2 text-sm text-[#a0a0a0]">
+                You can call <code className="font-mono text-xs">store</code> /{" "}
+                <code className="font-mono text-xs">retrieve</code> on the
+                contract.
               </p>
             </div>
           )}
 
-          {/* Copy Buttons for Salt/Address */}
-          <div className="mt-6 flex gap-3">
+          <div className="flex flex-wrap gap-2">
             <button
+              type="button"
               onClick={handleCopySalt}
-              className="flex-1 py-4 bg-gray-800 rounded-xl text-gray-300 hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+              className="rs-wb-btn-ghost flex-1 min-w-[120px] py-2.5 text-sm"
             >
               {copiedSalt ? <FaCheck /> : <FaCopy />}
-              Copy Salt
+              Copy salt
             </button>
             <button
+              type="button"
               onClick={handleCopyAddress}
-              className="flex-1 py-4 bg-gray-800 rounded-xl text-gray-300 hover:bg-gray-700 transition-colors flex items-center justify-center gap-2"
+              className="rs-wb-btn-ghost flex-1 min-w-[120px] py-2.5 text-sm"
             >
               {copiedAddress ? <FaCheck /> : <FaCopy />}
-              Copy Address
+              Copy address
             </button>
           </div>
 
-          {/* Bytecode Help Section */}
-          <div className="mt-4 border border-gray-700 rounded-xl overflow-hidden">
-            <details className="group">
-              <summary className="flex items-center justify-between p-4 bg-gray-800/50 cursor-pointer hover:bg-gray-700/50 transition-colors">
-                <span className="text-orange-300 font-medium flex items-center gap-2">
-                  <FaInfoCircle />
-                  How to get bytecode for your own contract?
-                </span>
-                <span className="text-gray-400 group-open:rotate-180 transition-transform">
-                  ▼
-                </span>
-              </summary>
-              <div className="p-4 bg-gray-900/80 border-t border-gray-700 space-y-4">
-                <div>
-                  <h4 className="text-white font-bold mb-2">
-                    🖥️ Using Remix (Browser)
-                  </h4>
-                  <ol className="list-decimal list-inside text-sm text-gray-300 space-y-1">
-                    <li>
-                      Open{" "}
-                      <a
-                        href="https://remix.ethereum.org"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-orange-400 hover:underline"
-                      >
-                        Remix IDE
-                      </a>
-                    </li>
-                    <li>Create or import your Solidity contract</li>
-                    <li>
-                      Compile it (Ctrl+S or click the Solidity compiler tab)
-                    </li>
-                    <li>
-                      Click the "Compilation Details" button (or find Bytecode
-                      in the compiler tab)
-                    </li>
-                    <li>
-                      Copy the{" "}
-                      <code className="bg-gray-800 px-1 py-0.5 rounded">
-                        object
-                      </code>{" "}
-                      field under <code>bytecode</code> (starts with 0x)
-                    </li>
-                    <li>Paste it here</li>
-                  </ol>
-                </div>
-                <div>
-                  <h4 className="text-white font-bold mb-2">
-                    ⚙️ Using Foundry (Local)
-                  </h4>
-                  <p className="text-sm text-gray-300 mb-1">
-                    Run in your terminal:
-                  </p>
-                  <pre className="bg-gray-950 p-2 rounded text-xs text-orange-400 overflow-x-auto">
-                    forge inspect YourContractName bytecode
-                  </pre>
-                  <p className="text-sm text-gray-300 mt-1">
-                    Copy the output and paste it above.
-                  </p>
-                </div>
-              </div>
-            </details>
-          </div>
+          <details className="rs-wb-callout mt-4 group">
+            <summary className="cursor-pointer list-none text-sm font-medium text-[#a0a0a0] marker:content-none [&::-webkit-details-marker]:hidden">
+              <span className="inline-flex items-center gap-2">
+                <FaInfoCircle className="text-[#FF6600]" aria-hidden />
+                How to get bytecode
+              </span>
+            </summary>
+            <div className="mt-3 space-y-3 border-t border-[#2a2a2a] pt-3 text-sm text-[#a0a0a0]">
+              <p>
+                <a
+                  href="https://remix.ethereum.org"
+                  className="text-[#FF6600] hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Remix
+                </a>
+                : compile → copy bytecode object.
+              </p>
+              <p className="font-mono text-xs text-white/85">
+                forge inspect YourContract bytecode
+              </p>
+            </div>
+          </details>
         </div>
       )}
     </div>

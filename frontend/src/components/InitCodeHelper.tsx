@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { hashInitCode } from "../utils/create2";
+import { exampleContracts } from "../utils/exampleContracts";
 import { FaCopy, FaCheck, FaCode, FaLightbulb, FaRocket } from 'react-icons/fa';
-import { BsLightningCharge } from 'react-icons/bs';
 
 export default function InitCodeHelper() {
   const [bytecode, setBytecode] = useState("");
@@ -61,7 +61,7 @@ export default function InitCodeHelper() {
   };
 
   const handlePasteExample = () => {
-    setBytecode("0x608060405234801561001057600080fd5b5061012f806100206000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80632e64cec114602d575b600080fd5b60336047565b604051603e9190605d565b60405180910390f35b60008054905090565b6057816076565b82525050565b6000602082019050607060008301846050565b92915050565b600081905091905056fea2646970667358221220123456789abcdef");
+    setBytecode(exampleContracts.simpleStorage.bytecode);
   };
 
   const getBytecodeStats = () => {
@@ -79,203 +79,163 @@ export default function InitCodeHelper() {
 
   return (
     <div className="rs-panel-strong p-8">
-      {/* Header with Icon */}
-      <div className="flex items-center mb-6 group">
-        <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-yellow-600 rounded-2xl flex items-center justify-center mr-4 shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-          <span className="text-2xl font-black text-white drop-shadow-lg">
-            <FaCode />
-          </span>
+      <div className="rs-wb-head">
+        <div className="rs-wb-icon" aria-hidden>
+          <FaCode className="text-lg" />
         </div>
         <div>
-          <h3 className="text-2xl font-black bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-500 bg-clip-text text-transparent tracking-tight drop-shadow-xl">
-            Init Code Hash Helper
-          </h3>
-          <p className="text-orange-300/80 text-lg font-medium flex items-center gap-2">
-            <BsLightningCharge className="text-yellow-500" />
-            Get keccak256 hash of your contract bytecode
+          <h3 className="rs-wb-title">Init code hash</h3>
+          <p className="rs-wb-desc">
+            Keccak256 of deployment bytecode for use in Calculate and Find salt.
           </p>
         </div>
       </div>
 
-      {/* Info Banner */}
-      <div className="mb-8 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-2xl border border-blue-500/30 backdrop-blur-sm">
-        <div className="flex items-start gap-3">
-          <FaLightbulb className="text-yellow-500 text-xl flex-shrink-0 mt-1" />
-          <p className="rs-muted text-sm leading-relaxed">
-            <span className="text-white font-bold">Quick tip:</span> Get bytecode from Remix (Compile → Bytecode) or from your compiled contract artifacts. 
-            The hash is used in Calculate Mode and Find Salt Mode.
+      <div className="rs-wb-callout mb-6">
+        <div className="flex items-start gap-2">
+          <FaLightbulb className="mt-0.5 shrink-0 text-[#FF6600]" aria-hidden />
+          <p className="text-sm leading-relaxed text-[#a0a0a0]">
+            Paste bytecode from Remix (compile details) or{" "}
+            <code className="font-mono text-xs text-white/90">
+              forge inspect &lt;Contract&gt; bytecode
+            </code>
+            .
           </p>
         </div>
       </div>
 
-      {/* Bytecode Input */}
-      <div className="space-y-2 mb-4">
-        <div className="flex items-center justify-between">
-          <label className="text-sm font-bold text-orange-300 tracking-wide uppercase bg-gray-800/50 px-4 py-2 rounded-xl inline-flex items-center border border-orange-500/30">
-            Contract Bytecode
-            <span className="text-xs text-orange-200 ml-3 font-mono bg-orange-500/20 px-2 py-1 rounded-lg">
-              {bytecodeLength > 0 ? `${bytecodeLength} chars` : 'Paste your bytecode'}
+      <div className="mb-4 space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <label className="rs-wb-label mb-0">
+            Contract bytecode{" "}
+            <span className="rs-wb-badge">
+              {bytecodeLength > 0 ? `${bytecodeLength} chars` : "hex"}
             </span>
           </label>
           <div className="flex gap-2">
             {bytecode && (
               <button
+                type="button"
                 onClick={handleClear}
-                className="text-sm text-gray-400 hover:text-red-400 transition-colors px-3 py-1 rounded-lg bg-gray-800/50 border border-gray-700"
+                className="rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] px-3 py-1 text-xs font-medium text-[#a0a0a0] hover:text-white"
               >
                 Clear
               </button>
             )}
             <button
+              type="button"
               onClick={handlePasteExample}
-              className="text-sm text-orange-400 hover:text-orange-300 transition-colors px-3 py-1 rounded-lg bg-orange-500/10 border border-orange-500/30"
+              className="rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] px-3 py-1 text-xs font-medium text-[#FF6600] hover:border-[#FF6600]/40"
             >
-              Paste Example
+              Paste example
             </button>
           </div>
         </div>
-        
+
         <textarea
           ref={textareaRef}
           placeholder="0x608060405234801561001057600080fd5b50..."
           value={bytecode}
           onChange={(e) => setBytecode(e.target.value)}
           rows={6}
-          className="w-full rounded-2xl border-2 border-white/10 focus:border-orange-500 focus:ring-4 focus:ring-orange-400/20 px-5 py-4 font-mono bg-black/30 backdrop-blur-sm text-white placeholder-white/40 resize-none shadow-xl hover:shadow-orange-500/10 hover:border-white/15 transition-all duration-300 text-sm"
+          className="rs-wb-input-mono min-h-[8rem] resize-y"
         />
       </div>
 
-      {/* Bytecode Stats */}
       {stats && (
-        <div className="mb-6 flex flex-wrap gap-3">
-          <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/10">
-            <span className="text-xs text-gray-400 block">Bytes</span>
-            <span className="text-sm font-mono text-orange-400 font-bold">{stats.bytes}</span>
+        <div className="mb-6 flex flex-wrap gap-2">
+          <div className="rounded-xl border border-[#2a2a2a] bg-black/30 px-3 py-2">
+            <span className="block text-xs text-[#a0a0a0]">Bytes</span>
+            <span className="font-mono text-sm text-white">{stats.bytes}</span>
           </div>
-          <div className="px-4 py-2 bg-white/5 rounded-xl border border-white/10">
-            <span className="text-xs text-gray-400 block">Format</span>
-            <span className="text-sm font-mono text-orange-400 font-bold">{stats.has0x ? '0x prefix' : 'no prefix'}</span>
+          <div className="rounded-xl border border-[#2a2a2a] bg-black/30 px-3 py-2">
+            <span className="block text-xs text-[#a0a0a0]">Format</span>
+            <span className="font-mono text-sm text-white">
+              {stats.has0x ? "0x prefix" : "no 0x"}
+            </span>
           </div>
         </div>
       )}
 
-      {/* Calculate Button */}
       <button
+        type="button"
         onClick={handleHash}
         disabled={!bytecode || isHashing}
-        className="w-full mt-4 py-5 rounded-3xl bg-gradient-to-r from-orange-500/90 via-yellow-500/80 to-orange-600/90 text-white font-black text-xl hover:from-orange-600/100 hover:via-yellow-600/90 hover:to-orange-700/100 shadow-2xl shadow-orange-500/40 hover:shadow-orange-500/60 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 backdrop-blur-sm border-2 border-orange-500/60 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        className="rs-wb-btn-accent mt-2 w-full disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isHashing ? (
-          <span className="flex items-center justify-center gap-3">
-            <span className="w-6 h-6 border-3 border-white/30 border-t-white animate-spin rounded-full"></span>
-            Calculating Hash...
+          <span className="flex items-center justify-center gap-2">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+            Hashing…
           </span>
         ) : (
-          <span className="flex items-center justify-center gap-3">
-            <FaRocket className="text-white" />
-            Calculate Hash
+          <span className="flex items-center justify-center gap-2">
+            <FaRocket className="text-base" aria-hidden />
+            Compute hash
           </span>
         )}
       </button>
 
-      {/* Result Display */}
       {hash && (
         <div
-          className={`mt-8 p-6 rounded-3xl shadow-2xl backdrop-blur-sm border-2 transition-all duration-500 animate-in fade-in-50 slide-in-from-bottom-4 ${
-            hash.startsWith("Error")
-              ? "bg-red-500/10 border-red-400/40 shadow-red-500/20"
-              : "bg-emerald-500/10 border-emerald-400/40 shadow-emerald-500/20"
+          className={`rs-wb-output mt-6 ${
+            hash.startsWith("Error") ? "border-red-500/30" : ""
           }`}
         >
-          <div className="flex items-center gap-3 mb-4">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              hash.startsWith("Error") ? "bg-red-500/20" : "bg-emerald-500/20"
-            }`}>
-              <span className="text-xl">
-                {hash.startsWith("Error") ? "❌" : "✅"}
-              </span>
-            </div>
-            <strong
-              className={`text-lg font-bold tracking-wide uppercase ${
-                hash.startsWith("Error")
-                  ? "text-red-300"
-                  : "bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent"
-              }`}
-            >
-              {hash.startsWith("Error") ? "Error:" : "Init Code Hash:"}
-            </strong>
-          </div>
+          <p
+            className={`rs-wb-output-h ${
+              hash.startsWith("Error") ? "text-red-300" : ""
+            }`}
+          >
+            {hash.startsWith("Error") ? "Error" : "Init code hash"}
+          </p>
+          <code
+            className={`rs-wb-code ${
+              hash.startsWith("Error") ? "text-red-200/90" : ""
+            }`}
+          >
+            {hash}
+          </code>
 
-          <div className="flex flex-col gap-4">
-            <code
-              className={`text-lg break-all font-mono rounded-2xl px-6 py-5 border font-bold text-white shadow-2xl ${
-                hash.startsWith("Error")
-                  ? "bg-red-900/50 border-red-400/50"
-                  : "bg-gray-800/80 border-emerald-400/50 hover:border-emerald-400 transition-colors"
-              }`}
-            >
-              {hash}
-            </code>
-            
-            {!hash.startsWith("Error") && (
-              <div className="flex gap-3">
-                <button
-                  onClick={handleCopy}
-                  className="flex-1 px-6 py-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold text-lg rounded-2xl hover:from-emerald-600 hover:to-green-700 shadow-2xl shadow-emerald-500/50 transform hover:scale-105 active:scale-95 transition-all duration-300 backdrop-blur-sm border border-emerald-400/50 flex items-center justify-center gap-2"
-                >
-                  {copied ? (
-                    <>
-                      <FaCheck className="text-white" />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <FaCopy />
-                      Copy Hash
-                    </>
-                  )}
-                </button>
-                
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(hash);
-                    // Trigger a custom event that other components can listen for
-                    window.dispatchEvent(new CustomEvent('hashCopied', { detail: hash }));
-                  }}
-                  className="px-6 py-4 bg-gray-800 text-white font-bold text-lg rounded-2xl hover:bg-gray-700 shadow-xl border border-gray-600 transform hover:scale-105 active:scale-95 transition-all duration-300"
-                  title="Copy and use in other modes"
-                >
-                  <FaRocket />
-                </button>
-              </div>
-            )}
-          </div>
+          {!hash.startsWith("Error") && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button type="button" onClick={handleCopy} className="rs-wb-btn-accent flex-1 sm:flex-none">
+                {copied ? <FaCheck /> : <FaCopy />}
+                {copied ? "Copied" : "Copy"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(hash);
+                  window.dispatchEvent(
+                    new CustomEvent("hashCopied", { detail: hash }),
+                  );
+                }}
+                className="rs-wb-btn-ghost"
+                title="Copy and broadcast to other modes"
+                aria-label="Copy hash for other modes"
+              >
+                <FaRocket className="text-[#FF6600]" aria-hidden />
+                Use in modes
+              </button>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Interactive Tips */}
-      <div className="mt-10 pt-8 border-t-2 border-gray-700/50">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="p-4 bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-orange-500/30 hover:border-orange-500 transition-all duration-300 group cursor-pointer">
-            <div className="flex items-start gap-3">
-              <span className="w-8 h-8 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="text-white font-bold text-sm">1️⃣</span>
-              </span>
-              <p className="text-orange-300 text-sm font-medium">
-                Get bytecode from <span className="text-white font-bold">Remix</span> or <span className="text-white font-bold">Foundry</span>
-              </p>
-            </div>
+      <div className="mt-8 border-t border-[#2a2a2a] pt-6">
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          <div className="rs-wb-callout">
+            <span className="text-xs font-medium text-[#a0a0a0]">1</span>
+            <p className="mt-1 text-sm text-[#a0a0a0]">
+              Bytecode from Remix or Foundry artifacts.
+            </p>
           </div>
-          
-          <div className="p-4 bg-gray-800/50 backdrop-blur-sm rounded-2xl border border-orange-500/30 hover:border-orange-500 transition-all duration-300 group cursor-pointer">
-            <div className="flex items-start gap-3">
-              <span className="w-8 h-8 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <span className="text-white font-bold text-sm">2️⃣</span>
-              </span>
-              <p className="text-orange-300 text-sm font-medium">
-                Use hash in <span className="text-white font-bold">Calculate Mode</span> or <span className="text-white font-bold">Find Salt Mode</span>
-              </p>
-            </div>
+          <div className="rs-wb-callout">
+            <span className="text-xs font-medium text-[#a0a0a0]">2</span>
+            <p className="mt-1 text-sm text-[#a0a0a0]">
+              Use the hash in Calculate and Find salt on the left.
+            </p>
           </div>
         </div>
       </div>

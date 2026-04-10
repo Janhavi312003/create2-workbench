@@ -1,80 +1,71 @@
+import { simpleStorageAbi } from "../abi/simpleStorageAbi";
 export declare const factoryConfig: {
-    address: `0x${string}`;
-    abi: ({
-        type: string;
-        stateMutability: string;
-        name?: undefined;
-        inputs?: undefined;
-        outputs?: undefined;
-        anonymous?: undefined;
-    } | {
-        type: string;
-        name: string;
-        inputs: {
-            name: string;
-            type: string;
-            internalType: string;
-        }[];
-        outputs: {
-            name: string;
-            type: string;
-            internalType: string;
-        }[];
-        stateMutability: string;
-        anonymous?: undefined;
-    } | {
-        type: string;
-        name: string;
-        inputs: {
-            name: string;
-            type: string;
-            indexed: boolean;
-            internalType: string;
-        }[];
-        anonymous: boolean;
-        stateMutability?: undefined;
-        outputs?: undefined;
-    } | {
-        type: string;
-        name: string;
-        inputs: never[];
-        stateMutability?: undefined;
-        outputs?: undefined;
-        anonymous?: undefined;
-    })[];
+    readonly address: `0x${string}` | undefined;
+    readonly abi: readonly [{
+        readonly type: "function";
+        readonly name: "computeAddress";
+        readonly stateMutability: "view";
+        readonly inputs: readonly [{
+            readonly name: "salt";
+            readonly type: "bytes32";
+        }, {
+            readonly name: "bytecode";
+            readonly type: "bytes";
+        }];
+        readonly outputs: readonly [{
+            readonly name: "";
+            readonly type: "address";
+        }];
+    }, {
+        readonly type: "function";
+        readonly name: "computeAddress";
+        readonly stateMutability: "view";
+        readonly inputs: readonly [{
+            readonly name: "salt";
+            readonly type: "bytes32";
+        }, {
+            readonly name: "initCodeHash";
+            readonly type: "bytes32";
+        }];
+        readonly outputs: readonly [{
+            readonly name: "";
+            readonly type: "address";
+        }];
+    }, {
+        readonly type: "function";
+        readonly name: "deploy";
+        readonly stateMutability: "payable";
+        readonly inputs: readonly [{
+            readonly name: "salt";
+            readonly type: "bytes32";
+        }, {
+            readonly name: "bytecode";
+            readonly type: "bytes";
+        }];
+        readonly outputs: readonly [{
+            readonly name: "deployedAddress";
+            readonly type: "address";
+        }];
+    }, {
+        readonly type: "event";
+        readonly name: "Deployed";
+        readonly inputs: readonly [{
+            readonly name: "deployed";
+            readonly type: "address";
+            readonly indexed: true;
+        }, {
+            readonly name: "salt";
+            readonly type: "bytes32";
+            readonly indexed: true;
+        }];
+    }, {
+        readonly type: "error";
+        readonly name: "Create2DeployFailed";
+        readonly inputs: readonly [];
+    }, {
+        readonly type: "error";
+        readonly name: "ReentrantCall";
+        readonly inputs: readonly [];
+    }];
 };
-export declare const simpleStorageABI: ({
-    type: string;
-    name: string;
-    inputs: never[];
-    outputs: {
-        name: string;
-        type: string;
-        internalType: string;
-    }[];
-    stateMutability: string;
-    anonymous?: undefined;
-} | {
-    type: string;
-    name: string;
-    inputs: {
-        name: string;
-        type: string;
-        internalType: string;
-    }[];
-    outputs: never[];
-    stateMutability: string;
-    anonymous?: undefined;
-} | {
-    type: string;
-    name: string;
-    inputs: {
-        name: string;
-        type: string;
-        indexed: boolean;
-        internalType: string;
-    }[];
-    anonymous: boolean;
-    outputs?: undefined;
-    stateMutability?: undefined;
-})[];
+export { simpleStorageAbi, simpleStorageAbi as simpleStorageABI };

@@ -1,10 +1,26 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+/// @dev Minimal reentrancy guard (avoids external submodule dependency for reproducible builds).
+abstract contract ReentrancyGuardLocal {
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+    uint256 private _status = _NOT_ENTERED;
 
-contract Create2Factory is ReentrancyGuard {
+    error ReentrantCall();
+
+    modifier nonReentrant() {
+        if (_status == _ENTERED) revert ReentrantCall();
+        _status = _ENTERED;
+        _;
+        _status = _NOT_ENTERED;
+    }
+}
+
+contract Create2Factory is ReentrancyGuardLocal {
     event Deployed(address indexed deployed, bytes32 indexed salt);
+
+    error Create2DeployFailed();
 
     // Use assembly (fixes asm-keccak256 lint)
     function computeAddress(bytes32 salt, bytes memory bytecode)
@@ -55,14 +71,20 @@ contract Create2Factory is ReentrancyGuard {
                 mload(bytecode),
                 salt
             )
+        }
 
-            if iszero(extcodesize(deployedAddress)) {
-                revert(0, 0)
-            }
+        if (deployedAddress == address(0)) {
+            revert Create2DeployFailed();
+        }
+
+        uint256 size;
+        assembly {
+            size := extcodesize(deployedAddress)
+        }
+        if (size == 0) {
+            revert Create2DeployFailed();
         }
 
         emit Deployed(deployedAddress, salt);
     }
-
-    receive() external payable {}
 }

@@ -1,20 +1,8 @@
-import { useState } from 'react'
 import { FaGithub, FaTwitter, FaDiscord, FaEnvelope, FaBug, FaBook, FaExternalLinkAlt  } from 'react-icons/fa'
 
 export function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    message: ''
-  })
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Handle form submission - you can integrate with a form service
-    console.log('Form submitted:', formData)
-    alert('Thank you for your message! We\'ll get back to you soon.')
-    setFormData({ name: '', email: '', message: '' })
-  }
+  const mailtoDraft =
+    'mailto:?subject=CREATE2%20Workbench%20feedback&body='
 
   return (
     <div className="rs-page max-w-6xl">
@@ -80,62 +68,22 @@ export function Contact() {
         <div className="rs-panel-strong p-8">
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
             <FaEnvelope className="text-orange-500" />
-            Send us a Message
+            Contact
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-white font-medium mb-2">
-                Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({...formData, name: e.target.value})}
-                className="rs-input"
-                placeholder="Your name"
-                required
-              />
-            </div>
+          <p className="rs-muted mb-6 leading-relaxed">
+            This page does not collect messages in-app. For feedback or questions, use the channels below or open an email draft.
+          </p>
 
-            <div>
-              <label htmlFor="email" className="block text-white font-medium mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-                className="rs-input"
-                placeholder="your@email.com"
-                required
-              />
-            </div>
-
-            <div>
-              <label htmlFor="message" className="block text-white font-medium mb-2">
-                Message
-              </label>
-              <textarea
-                id="message"
-                value={formData.message}
-                onChange={(e) => setFormData({...formData, message: e.target.value})}
-                rows={5}
-                className="rs-input"
-                placeholder="How can we help you?"
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full rs-btn-primary"
-            >
-              Send Message
-            </button>
-          </form>
+          <a
+            href={mailtoDraft}
+            className="inline-flex w-full justify-center items-center rs-btn-primary py-4 rounded-2xl font-semibold"
+          >
+            Open email draft
+          </a>
+          <p className="text-xs rs-muted mt-4">
+            Your mail app opens with a blank recipient so you can choose who to write to. For bugs and features, GitHub Issues is usually fastest.
+          </p>
         </div>
 
         {/* Additional Info */}

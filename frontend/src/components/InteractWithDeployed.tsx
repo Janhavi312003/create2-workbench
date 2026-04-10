@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { waitForTransactionReceipt } from '@wagmi/core';
+import toast from 'react-hot-toast';
 import { config } from './Providers';
 import { simpleStorageABI } from '../utils/contracts';
 import { FaCopy, FaCheck, FaExternalLinkAlt, FaRedo } from 'react-icons/fa';
@@ -15,6 +16,7 @@ export function InteractWithDeployed({ contractAddress }: Props) {
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>();
   const [isTxLoading, setIsTxLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [txError, setTxError] = useState<string | null>(null);
   
   const { isConnected } = useAccount();
 
@@ -30,7 +32,8 @@ export function InteractWithDeployed({ contractAddress }: Props) {
 
   const handleStore = async () => {
     if (!value) return;
-    
+    setTxError(null);
+
     try {
       const hash = await writeContractAsync({
         address: contractAddress,
@@ -55,6 +58,10 @@ export function InteractWithDeployed({ contractAddress }: Props) {
       }
     } catch (error) {
       console.error("Transaction failed:", error);
+      const msg =
+        error instanceof Error ? error.message : "Transaction failed.";
+      setTxError(msg);
+      toast.error(msg);
     } finally {
       setIsTxLoading(false);
     }
@@ -140,6 +147,12 @@ export function InteractWithDeployed({ contractAddress }: Props) {
         {!isConnected && (
           <p className="text-sm text-yellow-500 mt-3">
             ⚠️ Connect wallet to interact
+          </p>
+        )}
+
+        {txError && (
+          <p className="text-sm text-red-400 mt-3 break-words" role="alert">
+            {txError}
           </p>
         )}
 

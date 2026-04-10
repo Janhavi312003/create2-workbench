@@ -7,6 +7,10 @@ import {
   FaWallet,
   FaShieldAlt,
 } from "react-icons/fa";
+import {
+  ROOTSTOCK_TESTNET_CREATE2_FACTORY,
+  rootstockTestnetExplorerAddress,
+} from "../constants/deployments";
 
 export function FAQ() {
   const [openItems, setOpenItems] = useState<number[]>([]);
@@ -16,6 +20,10 @@ export function FAQ() {
       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
     );
   };
+
+  const factoryExplorer = rootstockTestnetExplorerAddress(
+    ROOTSTOCK_TESTNET_CREATE2_FACTORY,
+  );
 
   const faqCategories = [
     {
@@ -76,7 +84,7 @@ export function FAQ() {
         },
         {
           q: "What's the factory contract address?",
-          a: "The CREATE2 Factory is deployed at: 0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72 on Rootstock Testnet. You can verify it on the explorer: https://explorer.testnet.rsk.co/address/0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72",
+          a: `The CREATE2 factory on Rootstock Testnet is ${ROOTSTOCK_TESTNET_CREATE2_FACTORY}. Verify on the explorer: ${factoryExplorer}. Set the same address as VITE_FACTORY_ADDRESS in your frontend .env.`,
         },
       ],
     },
@@ -94,7 +102,7 @@ export function FAQ() {
         },
         {
           q: "My calculated address doesn't match?",
-          a: "Double-check your inputs: factory address (0xf39e...), salt (32-byte hex), and init code hash (from Init Helper). Make sure there are no extra spaces and the hex is properly formatted with '0x' prefix.",
+          a: `Double-check your inputs: factory address must match your deployment (documented default: ${ROOTSTOCK_TESTNET_CREATE2_FACTORY}), salt (32-byte hex), and init code hash (from Init Helper). No extra spaces; hex must use a 0x prefix.`,
         },
         {
           q: "The Init Code Helper gives wrong hash?",

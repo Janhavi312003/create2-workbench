@@ -68,9 +68,8 @@
 
 ### User Interface
 
-- 🎨 Modern gradient UI with indigo/purple theme
-- 🌓 Responsive design for mobile and desktop
-- 📱 Toast notifications for user feedback
+- 🎨 Tailwind-based layout with Rootstock-style accent colors (no separate animation library; motion is CSS-only where used)
+- 📱 Responsive layout and toast notifications for user feedback
 - 🔗 Direct links to Rootstock explorer
 - ⚙️ Configurable mining parameters (prefix length, attempts)
 
@@ -96,7 +95,7 @@
 ▼
 ┌─────────────────────┐
 │ CREATE2 Factory │
-│ 0xf39e...9cbdc │
+│ 0x058d...7AaDF │
 │ Rootstock Testnet │
 └─────────────────────┘
 │
@@ -111,18 +110,19 @@
 ## 🛠️ Technology Stack
 
 ### Frontend
-- **React 18**: Modern UI framework
+- **React 19**: UI framework
 - **TypeScript**: Type-safe development
-- **Vite**: Lightning-fast build tool
+- **Vite**: Build tool and dev server
 - **Tailwind CSS**: Utility-first styling
-- **ethers.js v6**: Ethereum/Rootstock interaction
-- **Web Workers API**: Background computation
+- **wagmi / viem / RainbowKit**: Wallet and chain configuration (see `frontend/src/components/Providers.tsx` for Rootstock testnet and mainnet RPCs)
+- **ethers.js v6**: CREATE2 math and hashing in the UI
+- **Web Workers API**: Background vanity salt search
 
 ### Smart Contracts
 - **Solidity 0.8.20**: Smart contract language
 - **Foundry**: Development framework and testing
 - **EIP-1014**: CREATE2 opcode implementation
-- **OpenZeppelin**: Secure contract libraries
+- **Create2Factory** uses a minimal inlined reentrancy guard (no OpenZeppelin import required for the factory build)
 
 ### Development Tools
 - **Git**: Version control
@@ -265,7 +265,7 @@ forge build
 **Step-by-step:**
 
 1. Click **"Calculate Mode"** tab
-2. Enter **Factory Address**: `0xf39e31f414e707f129AdC1E970006E07b07eA3Cc`
+2. Enter **Factory Address**: `0x058d31B1491230B1441eeeE9c9E4dB78A8E7AaDF`
 3. Enter **Salt**: Any 32-byte hex value (e.g., `0x0000...0001`)
 4. Enter **Init Code Hash**: Bytecode hash from Init Helper
 5. **Result**: Predicted CREATE2 address shown instantly
@@ -276,7 +276,7 @@ forge build
 **Step-by-step:**
 
 1. Click **"Find Salt Mode"** tab
-2. Enter **Factory Address**: `0xf39e31f414e707f129AdC1E970006E07b07eA3Cc`
+2. Enter **Factory Address**: `0x058d31B1491230B1441eeeE9c9E4dB78A8E7AaDF`
 3. Enter **Init Code Hash**: Bytecode hash from Init Helper
 4. Enter **Target Prefix**: Desired address start (e.g., `0000` for `0x0000...`)
 5. Click **"Start Mining"**
@@ -299,13 +299,15 @@ forge build
 
 ## 🔧 Deployed Contracts
 
+Canonical factory address for documentation and examples: `frontend/src/constants/deployments.ts` (also set `VITE_FACTORY_ADDRESS` in `frontend/.env` to match when you run the app).
+
 ### Rootstock Testnet
 ```bash
 
 | Contract | Address | Explorer |
 |----------|---------|----------|
-| **CREATE2 Factory** | `0xf39e31f414e707f129AdC1E970006E07b07eA3Cc` | [View](https://explorer.testnet.rsk.co/address/0xf39e31f414e707f129AdC1E970006E07b07eA3Cc) |
-| **Deployment TX** | - | [View](https://explorer.testnet.rsk.co/tx/0xfb4dfd8f2aab50715e256bbca248c7a47ca480c480be188edffa70e37daa999e) |
+| **CREATE2 Factory** | `0x058d31B1491230B1441eeeE9c9E4dB78A8E7AaDF` | [View](https://explorer.testnet.rsk.co/address/0x058d31B1491230B1441eeeE9c9E4dB78A8E7AaDF) |
+| **Deployment TX** | — | Update this row with your deployment transaction hash after redeploying. |
 ```
 
 **Network Details:**
@@ -427,7 +429,7 @@ create2-workbench/
 Calculates the deterministic CREATE2 address.
 
 const address = calculateCreate2Address(
-'0xf39e31f414e707f129AdC1E970006E07b07eA3Cc', // deployer
+'0x058d31B1491230B1441eeeE9c9E4dB78A8E7AaDF', // factory (deployer in CREATE2 formula)
 '0x0000000000000000000000000000000000000000000000000000000000000001', // salt
 '0x1a2b3c...' // initCodeHash
 );
@@ -437,7 +439,7 @@ const address = calculateCreate2Address(
 Finds a salt that produces an address with the desired prefix.
 
 const result = await findVanitySalt(
-'0xf39e31f414e707f129AdC1E970006E07b07eA3Cc',
+'0x058d31B1491230B1441eeeE9c9E4dB78A8E7AaDF',
 '0x1a2b3c...',
 '0000', // target prefix
 1000000 // max attempts

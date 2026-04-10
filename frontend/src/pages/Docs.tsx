@@ -1,9 +1,14 @@
 import { FaRocket, FaCalculator, FaSearch, FaCode, FaWallet, FaExternalLinkAlt } from 'react-icons/fa'
 import { useState } from 'react'
 import { BsLightningCharge } from 'react-icons/bs'
+import {
+  ROOTSTOCK_TESTNET_CREATE2_FACTORY,
+  rootstockTestnetExplorerAddress,
+} from '../constants/deployments'
 
 export function Docs() {
   const [activeSection, setActiveSection] = useState('getting-started')
+  const factoryExplorer = rootstockTestnetExplorerAddress(ROOTSTOCK_TESTNET_CREATE2_FACTORY)
 
   const sections = {
     'getting-started': {
@@ -68,7 +73,7 @@ export function Docs() {
             <h4 className="text-lg font-bold text-white mb-3">Step-by-step Guide</h4>
             <ol className="list-decimal list-inside space-y-3 text-[#a0a0a0]">
               <li>Click "Calculate Mode" tab</li>
-              <li>Enter Factory Address: <code className="bg-gray-950 px-2 py-1 rounded text-orange-400 text-sm">0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72</code></li>
+              <li>Enter Factory Address: <code className="bg-gray-950 px-2 py-1 rounded text-orange-400 text-sm">{ROOTSTOCK_TESTNET_CREATE2_FACTORY}</code></li>
               <li>Enter Salt: Any 32-byte hex value (e.g., 0x0000...0001)</li>
               <li>Enter Init Code Hash: Bytecode hash from Init Helper</li>
               <li>Result: Predicted CREATE2 address shown instantly</li>
@@ -79,7 +84,7 @@ export function Docs() {
           <div className="bg-black/50 rounded-xl p-6 border border-gray-800">
             <h4 className="text-lg font-bold text-white mb-3">Example</h4>
             <div className="bg-gray-950 rounded-lg p-4 font-mono text-sm space-y-2">
-              <p><span className="text-orange-500">Deployer:</span> 0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72</p>
+              <p><span className="text-orange-500">Factory:</span> {ROOTSTOCK_TESTNET_CREATE2_FACTORY}</p>
               <p><span className="text-orange-500">Salt:</span> 0x0000000000000000000000000000000000000000000000000000000000000001</p>
               <p><span className="text-orange-500">Init Code Hash:</span> 0x1a2b3c...</p>
               <p><span className="text-orange-500">Predicted Address:</span> 0x4e5a... (calculated instantly)</p>
@@ -99,7 +104,7 @@ export function Docs() {
             <h4 className="text-lg font-bold text-white mb-3">How to Mine Vanity Addresses</h4>
             <ol className="list-decimal list-inside space-y-3 text-[#a0a0a0]">
               <li>Click "Find Salt Mode" tab</li>
-              <li>Enter Factory Address: 0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72</li>
+              <li>Enter Factory Address: {ROOTSTOCK_TESTNET_CREATE2_FACTORY}</li>
               <li>Enter Init Code Hash: Bytecode hash from Init Helper</li>
               <li>Enter Target Prefix: Desired address start (e.g., 0000 for 0x0000...)</li>
               <li>Click "Start Mining"</li>
@@ -178,12 +183,12 @@ export function Docs() {
                   <td className="py-4 text-[#a0a0a0]">CREATE2 Factory</td>
                   <td className="py-4">
                     <code className="bg-gray-950 px-2 py-1 rounded text-orange-400 text-sm">
-                      0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72
+                      {ROOTSTOCK_TESTNET_CREATE2_FACTORY}
                     </code>
                   </td>
                   <td className="py-4">
                     <a 
-                      href="https://explorer.testnet.rsk.co/address/0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72"
+                      href={factoryExplorer}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-orange-500 hover:text-orange-400 flex items-center gap-1"

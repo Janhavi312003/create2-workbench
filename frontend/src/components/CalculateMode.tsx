@@ -1,11 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   calculateCreate2Address,
   isValidAddress,
   isValidHex,
 } from "../utils/create2";
 import { FaCopy, FaCheck, FaExclamationTriangle, FaCalculator, FaTrash, FaHistory } from 'react-icons/fa';
-import { BsLightningCharge } from 'react-icons/bs';
+
+type RecentCalc = {
+  id: string;
+  deployerAddress: string;
+  salt: string;
+  initCodeHash: string;
+  result: string;
+};
 
 export default function CalculateMode() {
   const [deployerAddress, setDeployerAddress] = useState("");
@@ -16,18 +23,18 @@ export default function CalculateMode() {
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
-  const [recentCalculations, setRecentCalculations] = useState<string[]>([]);
+  const [recentCalculations, setRecentCalculations] = useState<RecentCalc[]>([]);
   const [validationErrors, setValidationErrors] = useState({
     deployer: "",
     salt: "",
     initCode: ""
   });
+  const lastRecentKey = useRef<string>("");
 
-  // Load factory address from env
+  // Load factory address from env only (no silent on-chain fallback).
   useEffect(() => {
-    const factoryAddress = (import.meta as any)?.env?.VITE_FACTORY_ADDRESS || 
-      "0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72";
-    setDeployerAddress(factoryAddress);
+    const fromEnv = import.meta.env.VITE_FACTORY_ADDRESS?.trim() ?? "";
+    setDeployerAddress(fromEnv);
   }, []);
 
   // Listen for hash copied from InitCodeHelper
@@ -98,12 +105,6 @@ export default function CalculateMode() {
         );
         setResult(address);
         setError("");
-        
-        // Add to recent calculations
-        setRecentCalculations(prev => {
-          const newPrev = [address, ...prev].slice(0, 5);
-          return newPrev;
-        });
       } catch {
         setError("Failed to calculate address");
         setResult("");
@@ -112,6 +113,41 @@ export default function CalculateMode() {
 
     return () => clearTimeout(timer);
   }, [deployerAddress, salt, initCodeHash]);
+
+  useEffect(() => {
+    if (!result) return;
+    const key = JSON.stringify({
+      deployerAddress,
+      salt,
+      initCodeHash,
+      result,
+    });
+    if (key === lastRecentKey.current) return;
+    lastRecentKey.current = key;
+
+    setRecentCalculations((prev) => {
+      const exists = prev.some(
+        (p) =>
+          p.result === result &&
+          p.salt === salt &&
+          p.initCodeHash === initCodeHash &&
+          p.deployerAddress === deployerAddress,
+      );
+      if (exists) return prev;
+      const id =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random()}`;
+      const entry: RecentCalc = {
+        id,
+        deployerAddress,
+        salt,
+        initCodeHash,
+        result,
+      };
+      return [entry, ...prev].slice(0, 5);
+    });
+  }, [result, deployerAddress, salt, initCodeHash]);
 
   const handleCopy = () => {
     if (result) {
@@ -122,9 +158,7 @@ export default function CalculateMode() {
   };
 
   const resetForm = () => {
-    const factoryAddress = (import.meta as any)?.env?.VITE_FACTORY_ADDRESS || 
-      "0x9f1a6eA2dE1d7eb369A92DAB05339d64EdC7DD72";
-    setDeployerAddress(factoryAddress);
+    setDeployerAddress(import.meta.env.VITE_FACTORY_ADDRESS?.trim() ?? "");
     setSalt("0x0000000000000000000000000000000000000000000000000000000000000001");
     setInitCodeHash("");
     setResult("");
@@ -132,40 +166,46 @@ export default function CalculateMode() {
     setValidationErrors({ deployer: "", salt: "", initCode: "" });
   };
 
-  const loadFromRecent = (address: string) => {
-    // This would need to store full params, simplified for demo
-    console.log("Load recent:", address);
+  const loadFromRecent = (entry: RecentCalc) => {
+    setDeployerAddress(entry.deployerAddress);
+    setSalt(entry.salt);
+    setInitCodeHash(entry.initCodeHash);
   };
 
   return (
     <div className="rs-panel-strong p-8">
-      {/* Header */}
-      <div className="flex items-center mb-6 group">
-        <div className="w-14 h-14 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mr-4 shadow-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-          <span className="text-2xl font-black text-white drop-shadow-lg">
-            <FaCalculator />
-          </span>
+      <div className="rs-wb-head">
+        <div className="rs-wb-icon" aria-hidden>
+          <FaCalculator className="text-lg" />
         </div>
         <div>
-          <h2 className="text-2xl font-black bg-gradient-to-r from-orange-400 to-orange-500 bg-clip-text text-transparent tracking-tight drop-shadow-xl">
-            Calculate Address
-          </h2>
-          <p className="text-orange-300/80 text-lg font-medium flex items-center gap-2">
-            <BsLightningCharge className="text-yellow-500" />
-            Predict your contract address before deployment
+          <h2 className="rs-wb-title">Calculate address</h2>
+          <p className="rs-wb-desc">
+            Predict the contract address from deployer, salt, and init code hash
+            (CREATE2 / EIP‑1014).
           </p>
         </div>
       </div>
 
+      {!import.meta.env.VITE_FACTORY_ADDRESS?.trim() && (
+        <div className="rs-wb-callout mb-6 border-amber-500/25" role="status">
+          <p className="text-sm text-[#a0a0a0]">
+            Optional: set{" "}
+            <code className="font-mono text-xs text-white/90">
+              VITE_FACTORY_ADDRESS
+            </code>{" "}
+            to your factory, or paste any deployer address.
+          </p>
+        </div>
+      )}
+
       {/* Form */}
       <div className="space-y-6">
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-bold text-orange-300 tracking-wide uppercase bg-gray-800/60 px-4 py-2 rounded-2xl inline-flex items-center border border-orange-500/40">
-              Deployer Address
-              <span className="text-xs text-orange-200 ml-3 font-mono bg-orange-500/20 px-2 py-0.5 rounded-xl">
-                Factory contract
-              </span>
+          <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+            <label htmlFor="calc-deployer" className="rs-wb-label mb-0">
+              Deployer address{" "}
+              <span className="rs-wb-badge">Factory</span>
             </label>
             {validationErrors.deployer && (
               <span className="text-xs text-red-400 flex items-center gap-1">
@@ -174,10 +214,10 @@ export default function CalculateMode() {
             )}
           </div>
           <input
-            className={`w-full rounded-2xl border-2 transition-all duration-300 px-5 py-4 text-lg font-mono bg-gray-800/70 backdrop-blur-sm text-white placeholder-gray-400 shadow-lg hover:shadow-orange-400/25 ${
-              validationErrors.deployer
-                ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/30"
-                : "border-white/10 focus:border-orange-400 focus:ring-4 focus:ring-orange-500/20 hover:border-white/15"
+            id="calc-deployer"
+            autoComplete="off"
+            className={`rs-wb-input-mono pr-20 ${
+              validationErrors.deployer ? "border-red-500/45" : ""
             }`}
             placeholder="0x..."
             value={deployerAddress}
@@ -186,12 +226,9 @@ export default function CalculateMode() {
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-bold text-orange-300 tracking-wide uppercase bg-gray-800/60 px-4 py-2 rounded-2xl inline-flex items-center border border-orange-500/40">
-              Salt (bytes32)
-              <span className="text-xs text-orange-200 ml-3 font-mono bg-orange-500/20 px-2 py-0.5 rounded-xl">
-                32‑byte hex
-              </span>
+          <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+            <label htmlFor="calc-salt" className="rs-wb-label mb-0">
+              Salt (bytes32) <span className="rs-wb-badge">32-byte hex</span>
             </label>
             {validationErrors.salt && (
               <span className="text-xs text-red-400 flex items-center gap-1">
@@ -200,10 +237,10 @@ export default function CalculateMode() {
             )}
           </div>
           <input
-            className={`w-full rounded-2xl border-2 transition-all duration-300 px-5 py-4 text-lg font-mono bg-gray-800/70 backdrop-blur-sm text-white placeholder-gray-400 shadow-lg hover:shadow-orange-400/25 ${
-              validationErrors.salt
-                ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/30"
-                : "border-white/10 focus:border-orange-400 focus:ring-4 focus:ring-orange-500/20 hover:border-white/15"
+            id="calc-salt"
+            autoComplete="off"
+            className={`rs-wb-input-mono ${
+              validationErrors.salt ? "border-red-500/45" : ""
             }`}
             value={salt}
             onChange={(e) => setSalt(e.target.value)}
@@ -211,12 +248,10 @@ export default function CalculateMode() {
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm font-bold text-orange-300 tracking-wide uppercase bg-gray-800/60 px-4 py-2 rounded-2xl inline-flex items-center border border-orange-500/40">
-              Init Code Hash
-              <span className="text-xs text-orange-200 ml-3 font-mono bg-orange-500/20 px-2 py-0.5 rounded-xl">
-                keccak256 of bytecode
-              </span>
+          <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
+            <label htmlFor="calc-init-hash" className="rs-wb-label mb-0">
+              Init code hash{" "}
+              <span className="rs-wb-badge">keccak256(init code)</span>
             </label>
             {validationErrors.initCode && (
               <span className="text-xs text-red-400 flex items-center gap-1">
@@ -226,18 +261,20 @@ export default function CalculateMode() {
           </div>
           <div className="relative">
             <input
-              className={`w-full rounded-2xl border-2 transition-all duration-300 px-5 py-4 text-lg font-mono bg-gray-800/70 backdrop-blur-sm text-white placeholder-gray-400 shadow-lg hover:shadow-orange-400/25 pr-24 ${
-                validationErrors.initCode
-                  ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/30"
-                  : "border-white/10 focus:border-orange-400 focus:ring-4 focus:ring-orange-500/20 hover:border-white/15"
+              id="calc-init-hash"
+              autoComplete="off"
+              className={`rs-wb-input-mono pr-20 ${
+                validationErrors.initCode ? "border-red-500/45" : ""
               }`}
               placeholder="0x..."
               value={initCodeHash}
               onChange={(e) => setInitCodeHash(e.target.value)}
             />
             <button
+              type="button"
               onClick={() => setInitCodeHash("")}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-gray-700 rounded-lg text-xs text-gray-300 hover:bg-gray-600 transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] px-2.5 py-1 text-xs font-medium text-[#a0a0a0] hover:text-white"
+              aria-label="Clear init code hash"
             >
               Clear
             </button>
@@ -248,6 +285,7 @@ export default function CalculateMode() {
       {/* Reset Button */}
       <div className="flex justify-end mt-4">
         <button
+          type="button"
           onClick={resetForm}
           className="px-4 py-2 bg-gray-800/50 text-gray-300 rounded-xl hover:bg-gray-700/50 transition-all duration-300 border border-gray-700 flex items-center gap-2 text-sm"
         >
@@ -264,14 +302,15 @@ export default function CalculateMode() {
             <span className="text-sm text-gray-400 font-medium">Recent</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {recentCalculations.map((addr, i) => (
+            {recentCalculations.map((entry) => (
               <button
-                key={i}
-                onClick={() => loadFromRecent(addr)}
-                className="text-xs font-mono bg-gray-800 px-3 py-2 rounded-lg text-orange-400 hover:bg-gray-700 transition-colors border border-gray-600 truncate max-w-[200px]"
-                title={addr}
+                key={entry.id}
+                type="button"
+                onClick={() => loadFromRecent(entry)}
+                className="max-w-[220px] truncate rounded-lg border border-[#2a2a2a] bg-black/40 px-3 py-2 font-mono text-xs text-[#a0a0a0] hover:border-[#FF6600]/30 hover:text-white"
+                title={`${entry.result} — click to restore inputs`}
               >
-                {addr.slice(0, 10)}...{addr.slice(-8)}
+                {entry.result.slice(0, 10)}...{entry.result.slice(-8)}
               </button>
             ))}
           </div>
@@ -280,65 +319,54 @@ export default function CalculateMode() {
 
       {/* Error State */}
       {error && (
-        <div className="mt-6 p-4 bg-red-500/10 border border-red-400/40 backdrop-blur-sm rounded-2xl shadow-xl">
-          <div className="flex items-start gap-3">
-            <FaExclamationTriangle className="text-red-400 text-xl flex-shrink-0 mt-0.5" />
-            <div className="text-red-200 font-medium">
-              {error}
-            </div>
+        <div className="rs-wb-callout mt-6 border-red-500/35">
+          <div className="flex items-start gap-2">
+            <FaExclamationTriangle className="mt-0.5 shrink-0 text-red-400" aria-hidden />
+            <div className="text-sm font-medium text-red-200">{error}</div>
           </div>
         </div>
       )}
 
-      {/* Result State */}
       {result && (
-        <div className="mt-8 p-8 bg-emerald-900/50 border-2 border-emerald-500/70 backdrop-blur-sm rounded-3xl shadow-2xl shadow-emerald-900/40 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-xl">✅</span>
-            </div>
-            <h3 className="text-xl font-black bg-gradient-to-r from-emerald-400 to-green-500 bg-clip-text text-transparent">
-              Calculated Address
-            </h3>
-          </div>
-          
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-            <code className="flex-1 text-base lg:text-xl font-mono break-all font-bold text-emerald-200 bg-gray-900/80 backdrop-blur-sm border border-emerald-500/60 rounded-2xl px-6 py-5 shadow-xl">
-              {result}
-            </code>
+        <div className="rs-wb-output">
+          <h3 className="rs-wb-output-h">Calculated address</h3>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <code className="rs-wb-code flex-1">{result}</code>
             <button
+              type="button"
               onClick={handleCopy}
-              className="px-8 py-5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold text-lg rounded-2xl hover:from-emerald-600 hover:to-emerald-700 shadow-2xl shadow-emerald-500/50 transform hover:scale-105 active:scale-95 transition-all duration-300 border border-emerald-500/70 flex items-center justify-center gap-2 whitespace-nowrap"
+              className="rs-wb-btn-accent shrink-0"
             >
               {copied ? <FaCheck /> : <FaCopy />}
-              {copied ? 'Copied!' : 'Copy Address'}
+              {copied ? "Copied" : "Copy"}
             </button>
           </div>
         </div>
       )}
 
-      {/* Formula Section */}
-      <div className="mt-8 p-6 bg-gray-900/70 backdrop-blur-sm rounded-3xl border border-orange-500/40 shadow-xl">
-        <h4 className="text-lg font-bold text-orange-300 mb-4 tracking-wide uppercase drop-shadow-md flex items-center gap-2">
-          <BsLightningCharge />
+      <div className="rs-wb-callout mt-6">
+        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-[#a0a0a0]">
           Formula (EIP‑1014)
-        </h4>
-        <div className="bg-gray-800/60 backdrop-blur-sm rounded-2xl p-6 border border-orange-400/50">
-          <code className="text-sm lg:text-base font-mono text-orange-400 font-bold break-all block drop-shadow-lg">
-            address = keccak256(0xff ++ deployer ++ salt ++ keccak256(init_code))[12:]
-          </code>
-        </div>
+        </p>
+        <code className="block break-all font-mono text-sm leading-relaxed text-[#a0a0a0]">
+          address = keccak256(0xff ++ deployer ++ salt ++ keccak256(init_code))[12:]
+        </code>
       </div>
 
-      {/* Quick Tips */}
-      <div className="mt-6 grid grid-cols-2 gap-3">
-        <div className="p-3 bg-blue-500/10 rounded-xl border border-blue-500/30">
-          <span className="text-xs text-blue-300 block">Factory</span>
-          <span className="text-xs font-mono text-blue-400">0xf39e3...A3Cc</span>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <div className="rounded-xl border border-[#2a2a2a] bg-black/30 p-3">
+          <span className="block text-xs text-[#a0a0a0]">Deployer</span>
+          <span className="mt-1 block font-mono text-xs text-white break-all">
+            {deployerAddress
+              ? `${deployerAddress.slice(0, 6)}…${deployerAddress.slice(-4)}`
+              : "—"}
+          </span>
         </div>
-        <div className="p-3 bg-purple-500/10 rounded-xl border border-purple-500/30">
-          <span className="text-xs text-purple-300 block">Default Salt</span>
-          <span className="text-xs font-mono text-purple-400">0x0000...0001</span>
+        <div className="rounded-xl border border-[#2a2a2a] bg-black/30 p-3">
+          <span className="block text-xs text-[#a0a0a0]">Default salt</span>
+          <span className="mt-1 block font-mono text-xs text-white">
+            0x0000…0001
+          </span>
         </div>
       </div>
     </div>
