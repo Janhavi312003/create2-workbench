@@ -449,46 +449,6 @@ address deployed = factory.deploy(salt, bytecode);
 
 ---
 
-## 🐛 Troubleshooting
-
-### MetaMask Issues
-
-**"Wrong Network" Error:**
-- Click the network switcher button in the app
-- Or manually switch to Rootstock Testnet in MetaMask
-- Network details: ChainID `31`, RPC `https://public-node.testnet.rsk.co`
-
-**Connection Refused:**
-- Ensure MetaMask is installed and unlocked
-- Refresh the page and try connecting again
-- Check browser console for detailed errors
-
-### Calculation Issues
-
-**"Invalid Address" Error:**
-- Ensure address is 42 characters (0x + 40 hex)
-- Use checksummed addresses when possible
-- Verify factory contract is deployed
-
-**"Invalid Init Code Hash":**
-- Hash must be 66 characters (0x + 64 hex)
-- Use the Init Code Helper to generate correct hash
-- Ensure bytecode is valid hex
-
-### Vanity Mining Issues
-
-**Mining Takes Too Long:**
-- Reduce prefix length (each character is 16x harder)
-- Increase max attempts
-- Use shorter prefixes (2-3 characters recommended)
-
-**Worker Not Responding:**
-- Check browser console for errors
-- Ensure Web Workers are supported in your browser
-- Try refreshing the page
-
----
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please follow these steps:
