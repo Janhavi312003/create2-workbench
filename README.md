@@ -497,7 +497,7 @@ Contributions are welcome! Please follow these steps:
 
 ## 🏆 Built For
 
-**Rootstock Hacktivator Program 2024-2025**
+**Rootstock Hacktivator Program**
 
 This project demonstrates:
 - ✅ Production-ready tooling for Rootstock developers
@@ -525,7 +525,6 @@ For issues, questions, or contributions:
 
 - 🐛 [Open an issue](https://github.com/Janhavi312003/create2-workbench/issues)
 - 💬 Check existing documentation
-- 📖 Review [troubleshooting section](#-troubleshooting)
 - 🔍 Search closed issues for solutions
 
 ---
