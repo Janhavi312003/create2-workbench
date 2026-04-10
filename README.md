@@ -364,20 +364,6 @@ forge script script/GetInfo.s.sol
 Test deployment
 forge script script/TestCreate2.s.sol --rpc-url rootstock_testnet --broadcast --legacy -vvvv
 ```
-
-
-### Manual Testing Checklist
-
-- [ ] Calculate mode produces correct addresses
-- [ ] Find salt mode finds matching prefixes
-- [ ] Init code helper calculates correct hashes
-- [ ] MetaMask connects to Rootstock
-- [ ] Network switching works correctly
-- [ ] Copy buttons work for all fields
-- [ ] Toast notifications appear
-- [ ] Web Worker doesn't freeze UI
-- [ ] Responsive on mobile devices
-
 ---
 
 ## 📁 Project Structure
