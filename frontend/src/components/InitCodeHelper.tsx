@@ -106,7 +106,7 @@ export default function InitCodeHelper() {
 
       <div className="mb-4 space-y-2">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <label className="rs-wb-label mb-0">
+          <label className="rs-wb-label mb-0" htmlFor="init-bytecode">
             Contract bytecode{" "}
             <span className="rs-wb-badge">
               {bytecodeLength > 0 ? `${bytecodeLength} chars` : "hex"}
@@ -133,6 +133,7 @@ export default function InitCodeHelper() {
         </div>
 
         <textarea
+          id="init-bytecode"
           ref={textareaRef}
           placeholder="0x608060405234801561001057600080fd5b50..."
           value={bytecode}

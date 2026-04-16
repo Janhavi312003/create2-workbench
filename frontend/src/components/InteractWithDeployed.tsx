@@ -123,11 +123,15 @@ export function InteractWithDeployed({ contractAddress }: Props) {
 
       {/* Set New Value */}
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">
+        <label
+          className="block text-sm font-medium text-gray-300 mb-2"
+          htmlFor="interact-set-value"
+        >
           Set New Value:
         </label>
         <div className="flex gap-3">
           <input
+            id="interact-set-value"
             type="number"
             value={value}
             onChange={(e) => setValue(e.target.value)}

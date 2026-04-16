@@ -471,11 +471,12 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
 
       <div className="rs-panel mb-8 space-y-5 p-5 sm:p-6">
         <div>
-          <label className="rs-wb-label">
+          <label className="rs-wb-label" htmlFor="find-factory">
             Factory address{" "}
             <span className="rs-wb-badge">CREATE2 deployer</span>
           </label>
           <input
+            id="find-factory"
             type="text"
             placeholder="0x..."
             value={deployerAddress}
@@ -487,7 +488,7 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
 
         <div>
           <div className="mb-1.5 flex flex-wrap items-center justify-between gap-2">
-            <label className="rs-wb-label mb-0">
+            <label className="rs-wb-label mb-0" htmlFor="find-init-hash">
               Init code hash <span className="rs-wb-badge">bytes32</span>
             </label>
             <button
@@ -501,6 +502,7 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
           </div>
           <div className="relative">
             <input
+              id="find-init-hash"
               type="text"
               placeholder="0x…"
               value={initCodeHash}
@@ -519,8 +521,11 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
         </div>
 
         <div>
-          <label className="rs-wb-label">Address prefix</label>
+          <label className="rs-wb-label" htmlFor="find-prefix">
+            Address prefix
+          </label>
           <input
+            id="find-prefix"
             type="text"
             placeholder="0x0000"
             value={prefix}
@@ -684,7 +689,10 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
 
           <div className="mb-6">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <label className="rs-wb-label mb-0 flex items-center gap-2">
+              <label
+                className="rs-wb-label mb-0 flex items-center gap-2"
+                htmlFor="find-bytecode"
+              >
                 <FaCode aria-hidden />
                 Bytecode
               </label>
@@ -698,6 +706,7 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
             </div>
 
             <textarea
+              id="find-bytecode"
               value={bytecode}
               onChange={(e) => setBytecode(e.target.value)}
               placeholder="0x6080…"
@@ -714,7 +723,11 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
           </div>
 
           <div className="mb-4 flex flex-wrap gap-2">
+            <label className="sr-only" htmlFor="find-example-contract">
+              Example contract
+            </label>
             <select
+              id="find-example-contract"
               value={selectedExample}
               onChange={(e) => {
                 const next = e.target.value;
