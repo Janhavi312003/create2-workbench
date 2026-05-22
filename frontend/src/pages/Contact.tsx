@@ -1,9 +1,6 @@
 import { FaGithub, FaTwitter, FaDiscord, FaEnvelope, FaBug, FaBook, FaExternalLinkAlt  } from 'react-icons/fa'
 
 export function Contact() {
-  const mailtoDraft =
-    'mailto:?subject=CREATE2%20Workbench%20feedback&body='
-
   return (
     <div className="rs-page max-w-6xl">
       <div className="text-center mb-12">
@@ -72,17 +69,19 @@ export function Contact() {
           </h2>
 
           <p className="rs-muted mb-6 leading-relaxed">
-            This page does not collect messages in-app. For feedback or questions, use the channels below or open an email draft.
+            This page does not collect messages in-app. For feedback or questions, use GitHub Issues or the official Rootstock contact page.
           </p>
 
           <a
-            href={mailtoDraft}
+            href="https://rootstock.io/contact/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex w-full justify-center items-center rs-btn-primary py-4 rounded-2xl font-semibold"
           >
-            Open email draft
+            Contact Rootstock
           </a>
           <p className="text-xs rs-muted mt-4">
-            Your mail app opens with a blank recipient so you can choose who to write to. For bugs and features, GitHub Issues is usually fastest.
+            For bugs and feature requests on this workbench, GitHub Issues is usually fastest.
           </p>
         </div>
 

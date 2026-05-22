@@ -14,3 +14,7 @@ interface ImportMeta {
   readonly env: ImportMetaEnv
 }
 
+interface WindowEventMap {
+  hashCopied: CustomEvent<string>
+}
+

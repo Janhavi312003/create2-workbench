@@ -23,11 +23,7 @@ contract Create2Factory is ReentrancyGuardLocal {
     error Create2DeployFailed();
 
     // Use assembly (fixes asm-keccak256 lint)
-    function computeAddress(bytes32 salt, bytes memory bytecode)
-        public
-        view
-        returns (address)
-    {
+    function computeAddress(bytes32 salt, bytes memory bytecode) public view returns (address) {
         bytes32 initCodeHash;
         assembly {
             initCodeHash := keccak256(add(bytecode, 0x20), mload(bytecode))
@@ -36,11 +32,7 @@ contract Create2Factory is ReentrancyGuardLocal {
         return computeAddress(salt, initCodeHash);
     }
 
-    function computeAddress(bytes32 salt, bytes32 initCodeHash)
-        public
-        view
-        returns (address addr)
-    {
+    function computeAddress(bytes32 salt, bytes32 initCodeHash) public view returns (address addr) {
         assembly {
             let ptr := mload(0x40)
 
@@ -51,26 +43,13 @@ contract Create2Factory is ReentrancyGuardLocal {
             mstore(add(ptr, 0x15), salt)
             mstore(add(ptr, 0x35), initCodeHash)
 
-            addr := and(
-                keccak256(ptr, 0x55),
-                0xffffffffffffffffffffffffffffffffffffffff
-            )
+            addr := and(keccak256(ptr, 0x55), 0xffffffffffffffffffffffffffffffffffffffff)
         }
     }
 
-    function deploy(bytes32 salt, bytes memory bytecode)
-        public
-        payable
-        nonReentrant
-        returns (address deployedAddress)
-    {
+    function deploy(bytes32 salt, bytes memory bytecode) public payable nonReentrant returns (address deployedAddress) {
         assembly {
-            deployedAddress := create2(
-                callvalue(),
-                add(bytecode, 0x20),
-                mload(bytecode),
-                salt
-            )
+            deployedAddress := create2(callvalue(), add(bytecode, 0x20), mload(bytecode), salt)
         }
 
         if (deployedAddress == address(0)) {

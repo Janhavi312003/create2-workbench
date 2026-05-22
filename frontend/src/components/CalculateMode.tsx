@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   calculateCreate2Address,
   isValidAddress,
@@ -15,7 +15,9 @@ type RecentCalc = {
 };
 
 export default function CalculateMode() {
-  const [deployerAddress, setDeployerAddress] = useState("");
+  const [deployerAddress, setDeployerAddress] = useState(
+    () => import.meta.env.VITE_FACTORY_ADDRESS?.trim() ?? "",
+  );
   const [salt, setSalt] = useState(
     "0x0000000000000000000000000000000000000000000000000000000000000001",
   );
@@ -24,34 +26,11 @@ export default function CalculateMode() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [recentCalculations, setRecentCalculations] = useState<RecentCalc[]>([]);
-  const [validationErrors, setValidationErrors] = useState({
-    deployer: "",
-    salt: "",
-    initCode: ""
-  });
-  const lastRecentKey = useRef<string>("");
-
-  // Load factory address from env only (no silent on-chain fallback).
-  useEffect(() => {
-    const fromEnv = import.meta.env.VITE_FACTORY_ADDRESS?.trim() ?? "";
-    setDeployerAddress(fromEnv);
-  }, []);
-
-  // Listen for hash copied from InitCodeHelper
-  useEffect(() => {
-    const handleHashCopied = (event: CustomEvent) => {
-      setInitCodeHash(event.detail);
-    };
-    window.addEventListener('hashCopied' as any, handleHashCopied);
-    return () => window.removeEventListener('hashCopied' as any, handleHashCopied);
-  }, []);
-
-  // Validate inputs in real-time
-  useEffect(() => {
+  const validationErrors = useMemo(() => {
     const errors = {
       deployer: "",
       salt: "",
-      initCode: ""
+      initCode: "",
     };
 
     if (deployerAddress && !isValidAddress(deployerAddress)) {
@@ -66,8 +45,17 @@ export default function CalculateMode() {
       errors.initCode = "Must be 32 bytes (66 chars with 0x)";
     }
 
-    setValidationErrors(errors);
+    return errors;
   }, [deployerAddress, salt, initCodeHash]);
+
+  // Listen for hash copied from InitCodeHelper
+  useEffect(() => {
+    const handleHashCopied = (event: CustomEvent<string>) => {
+      setInitCodeHash(event.detail);
+    };
+    window.addEventListener("hashCopied", handleHashCopied);
+    return () => window.removeEventListener("hashCopied", handleHashCopied);
+  }, []);
 
   // Calculate address with debounce
   useEffect(() => {
@@ -105,6 +93,28 @@ export default function CalculateMode() {
         );
         setResult(address);
         setError("");
+        setRecentCalculations((prev) => {
+          const exists = prev.some(
+            (p) =>
+              p.result === address &&
+              p.salt === salt &&
+              p.initCodeHash === initCodeHash &&
+              p.deployerAddress === deployerAddress,
+          );
+          if (exists) return prev;
+          const id =
+            typeof crypto !== "undefined" && "randomUUID" in crypto
+              ? crypto.randomUUID()
+              : `${Date.now()}-${Math.random()}`;
+          const entry: RecentCalc = {
+            id,
+            deployerAddress,
+            salt,
+            initCodeHash,
+            result: address,
+          };
+          return [entry, ...prev].slice(0, 5);
+        });
       } catch {
         setError("Failed to calculate address");
         setResult("");
@@ -113,41 +123,6 @@ export default function CalculateMode() {
 
     return () => clearTimeout(timer);
   }, [deployerAddress, salt, initCodeHash]);
-
-  useEffect(() => {
-    if (!result) return;
-    const key = JSON.stringify({
-      deployerAddress,
-      salt,
-      initCodeHash,
-      result,
-    });
-    if (key === lastRecentKey.current) return;
-    lastRecentKey.current = key;
-
-    setRecentCalculations((prev) => {
-      const exists = prev.some(
-        (p) =>
-          p.result === result &&
-          p.salt === salt &&
-          p.initCodeHash === initCodeHash &&
-          p.deployerAddress === deployerAddress,
-      );
-      if (exists) return prev;
-      const id =
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : `${Date.now()}-${Math.random()}`;
-      const entry: RecentCalc = {
-        id,
-        deployerAddress,
-        salt,
-        initCodeHash,
-        result,
-      };
-      return [entry, ...prev].slice(0, 5);
-    });
-  }, [result, deployerAddress, salt, initCodeHash]);
 
   const handleCopy = () => {
     if (result) {
@@ -163,7 +138,6 @@ export default function CalculateMode() {
     setInitCodeHash("");
     setResult("");
     setError("");
-    setValidationErrors({ deployer: "", salt: "", initCode: "" });
   };
 
   const loadFromRecent = (entry: RecentCalc) => {

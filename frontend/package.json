@@ -40,10 +40,12 @@
     "vite": "^7.3.2"
   },
   "overrides": {
-    "axios": "^1.15.0",
+    "axios": "^1.15.2",
     "uuid": "^14.0.0",
     "defu": "^6.1.4",
     "socket.io-parser": "^4.2.4",
-    "brace-expansion": "^2.0.2"
+    "brace-expansion": "^2.0.2",
+    "ws": "^8.20.1",
+    "hono": "^4.12.18"
   }
 }

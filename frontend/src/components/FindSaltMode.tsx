@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useAccount, useChainId, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "@wagmi/core";
-import { config } from "./Providers";
+import { config } from "../wagmiConfig";
 import {
   isValidAddress,
   isValidHex,
@@ -64,8 +64,6 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
   // Performance states
   const [searchSpeed, setSearchSpeed] = useState(0);
   const [estimatedTime, setEstimatedTime] = useState<string>("");
-  const [prefixDifficulty, setPrefixDifficulty] = useState<string>("");
-
   // Deployment states
   const [deployStep, setDeployStep] = useState<
     "idle" | "preparing" | "deploying" | "success"
@@ -93,19 +91,17 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
   // Wagmi v2 hooks
   const { writeContractAsync, isPending: isWritePending } = useWriteContract();
 
-  // Calculate prefix difficulty
-  useEffect(() => {
-    if (prefix && prefix.startsWith("0x")) {
-      const prefixLength = prefix.length - 2; // Remove '0x'
-      const difficulty = Math.pow(16, prefixLength);
-      if (difficulty > 1000000) {
-        setPrefixDifficulty(`${(difficulty / 1000000).toFixed(1)}M`);
-      } else if (difficulty > 1000) {
-        setPrefixDifficulty(`${(difficulty / 1000).toFixed(1)}K`);
-      } else {
-        setPrefixDifficulty(difficulty.toString());
-      }
+  const prefixDifficulty = useMemo(() => {
+    if (!prefix || !prefix.startsWith("0x")) return "";
+    const prefixLength = prefix.length - 2; // Remove '0x'
+    const difficulty = Math.pow(16, prefixLength);
+    if (difficulty > 1000000) {
+      return `${(difficulty / 1000000).toFixed(1)}M`;
     }
+    if (difficulty > 1000) {
+      return `${(difficulty / 1000).toFixed(1)}K`;
+    }
+    return difficulty.toString();
   }, [prefix]);
 
   // Listen for hash copied from InitCodeHelper
@@ -113,9 +109,9 @@ export default function FindSaltMode({ onDeploySuccess }: FindSaltModeProps) {
     const handleHashCopied = (event: CustomEvent) => {
       setInitCodeHash(event.detail);
     };
-    window.addEventListener("hashCopied" as any, handleHashCopied);
+    window.addEventListener("hashCopied", handleHashCopied);
     return () =>
-      window.removeEventListener("hashCopied" as any, handleHashCopied);
+      window.removeEventListener("hashCopied", handleHashCopied);
   }, []);
 
   const startSearch = () => {

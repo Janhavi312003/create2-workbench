@@ -14,18 +14,6 @@
   --rs-accent: #ff6600;
 }
 
-/* Dark mode styles */
-.dark {
-  color-scheme: dark;
-}
-
-/* Light mode styles - if you want to support light theme */
-:root:not(.dark) {
-  color-scheme: light;
-  --bg-primary: #f3f4f6;
-  --text-primary: #111827;
-}
-
 html {
   transition: background-color 0.3s ease;
 }

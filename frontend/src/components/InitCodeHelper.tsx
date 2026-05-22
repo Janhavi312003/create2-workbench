@@ -8,7 +8,6 @@ export default function InitCodeHelper() {
   const [hash, setHash] = useState("");
   const [isHashing, setIsHashing] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [bytecodeLength, setBytecodeLength] = useState(0);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-adjust textarea height
@@ -17,11 +16,6 @@ export default function InitCodeHelper() {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
-  }, [bytecode]);
-
-  // Update bytecode length for character count
-  useEffect(() => {
-    setBytecodeLength(bytecode.length);
   }, [bytecode]);
 
   const handleHash = () => {
@@ -38,7 +32,7 @@ export default function InitCodeHelper() {
       try {
         const result = hashInitCode(bytecode);
         setHash(result);
-      } catch (error) {
+      } catch {
         setHash("Error: Invalid bytecode format");
       } finally {
         setIsHashing(false);
@@ -109,7 +103,7 @@ export default function InitCodeHelper() {
           <label className="rs-wb-label mb-0" htmlFor="init-bytecode">
             Contract bytecode{" "}
             <span className="rs-wb-badge">
-              {bytecodeLength > 0 ? `${bytecodeLength} chars` : "hex"}
+              {bytecode.length > 0 ? `${bytecode.length} chars` : "hex"}
             </span>
           </label>
           <div className="flex gap-2">

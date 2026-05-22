@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { Link, useLocation } from 'react-router-dom'
 import { FaBars, FaTimes } from 'react-icons/fa'
-import { hasWalletConnectProjectId } from './Providers'
+import { hasWalletConnectProjectId } from '../wagmiConfig'
 import { InjectedWalletControls } from './InjectedWalletControls'
 
 export function Navbar() {

@@ -45,6 +45,10 @@ yarn-error.log*
 cache/
 broadcast/
 *.env
+foundry.toml.backup
+
+# Unused third-party libs (project uses inlined guards; no OZ import)
+contracts/lib/openzeppelin-contracts/
 
 # Vercel
 .vercel

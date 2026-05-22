@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAccount, useReadContract, useWriteContract } from 'wagmi';
 import { waitForTransactionReceipt } from '@wagmi/core';
 import toast from 'react-hot-toast';
-import { config } from './Providers';
+import { config } from '../wagmiConfig';
 import { simpleStorageABI } from '../utils/contracts';
 import { FaCopy, FaCheck, FaExternalLinkAlt, FaRedo } from 'react-icons/fa';
 

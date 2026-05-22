@@ -1,23 +1,22 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import {Script} from "forge-std/Script.sol";
 import {console} from "forge-std/console.sol";
 import {Create2Factory} from "../src/Create2Factory.sol";
 import {SimpleStorage} from "../src/SimpleStorage.sol";
 
-
 contract TestCreate2 is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address payable factoryAddress = payable(vm.envAddress("FACTORY_ADDRESS")); 
+        address payable factoryAddress = payable(vm.envAddress("FACTORY_ADDRESS"));
         bytes32 salt = vm.envBytes32("SALT");
 
         console.log("Using Factory:", factoryAddress);
         console.log("Using Salt:", uint256(salt));
-        
-        Create2Factory factory = Create2Factory(payable(factoryAddress)); 
-        
+
+        Create2Factory factory = Create2Factory(payable(factoryAddress));
+
         vm.startBroadcast(deployerPrivateKey);
 
         bytes memory bytecode = type(SimpleStorage).creationCode;

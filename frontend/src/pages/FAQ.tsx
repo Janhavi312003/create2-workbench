@@ -148,10 +148,16 @@ export function FAQ() {
                 return (
                   <div key={itemIndex} className="p-6">
                     <button
+                      type="button"
                       onClick={() => toggleItem(globalIndex)}
+                      aria-expanded={isOpen}
+                      aria-controls={`faq-answer-${globalIndex}`}
                       className="w-full flex items-center justify-between text-left group"
                     >
-                      <h3 className="text-lg font-semibold text-white group-hover:text-orange-500 transition-colors pr-8">
+                      <h3
+                        id={`faq-question-${globalIndex}`}
+                        className="text-lg font-semibold text-white group-hover:text-orange-500 transition-colors pr-8"
+                      >
                         {item.q}
                       </h3>
                       <div
@@ -166,7 +172,12 @@ export function FAQ() {
                     </button>
 
                     {isOpen && (
-                      <div className="mt-4 rs-muted leading-relaxed">
+                      <div
+                        id={`faq-answer-${globalIndex}`}
+                        role="region"
+                        aria-labelledby={`faq-question-${globalIndex}`}
+                        className="mt-4 rs-muted leading-relaxed"
+                      >
                         {item.a}
                       </div>
                     )}
